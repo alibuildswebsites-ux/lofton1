@@ -8,6 +8,7 @@ import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { LocationsSection } from './LocationsSection';
 import { TestimonialsSection } from './TestimonialsSection';
+import { getOptimizedImageUrl, updateSEO } from '../utils';
 
 // --- Types ---
 
@@ -28,8 +29,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({
 }) => {
 
   useEffect(() => {
+    updateSEO({
+      title: "About Lofton Realty | Our Story & Team",
+      description: "Learn about Lofton Realty, a relationship-driven brokerage founded by Jared Lofton. Serving Houston, Galveston, Austin, and beyond with integrity.",
+      url: "https://loftonrealty.com/about"
+    });
     window.scrollTo(0, 0);
-    document.title = "About Lofton Realty | Real Estate Built on Relationships";
   }, []);
 
   // --- Data ---
@@ -74,6 +79,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({
     { title: "24/7 Availability", desc: "Real estate doesn't follow a 9-5 schedule. Neither do we. We're available when you need us." }
   ];
 
+  const heroBg = "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1920&q=80";
+
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
       <Navbar onNavigate={(section) => {
@@ -86,7 +93,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-charcoal-dark overflow-hidden">
-        <div className="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center" />
+        <div 
+          className="absolute inset-0 opacity-30 bg-cover bg-center" 
+          style={{ backgroundImage: `url(${getOptimizedImageUrl(heroBg, 1200)})` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal-dark via-charcoal-dark/90 to-transparent" />
         
         <div className="relative max-w-7xl mx-auto px-5 md:px-10 z-10">
@@ -128,9 +138,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             <div className="relative">
                <div className="absolute -inset-4 bg-brand/10 rounded-3xl transform rotate-3" />
                <img 
-                 src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1000&q=80" 
+                 src={getOptimizedImageUrl('https://images.unsplash.com/photo-1542744173-8e7e53415bb0', 800)} 
                  alt="Team collaboration" 
                  className="relative rounded-2xl shadow-xl w-full h-auto object-cover aspect-[4/3]"
+                 loading="lazy"
                />
                <div className="absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur p-6 rounded-xl shadow-lg border border-gray-100">
                   <p className="font-serif italic text-charcoal text-lg">
@@ -151,9 +162,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               <div className="w-64 h-64 md:w-80 md:h-80 flex-shrink-0 relative">
                  <div className="absolute inset-0 bg-brand rounded-full blur-[40px] opacity-20" />
                  <img 
-                   src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=80" 
+                   src={getOptimizedImageUrl('https://images.unsplash.com/photo-1560250097-0b93528c311a', 600)} 
                    alt="Jared Lofton, MBA" 
                    className="relative w-full h-full object-cover rounded-full border-4 border-white/10 shadow-2xl"
+                   loading="lazy"
                  />
                  <div className="absolute bottom-4 right-4 bg-brand text-white p-3 rounded-full shadow-lg">
                    <Award size={24} />
@@ -191,7 +203,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                    <a href="mailto:Info@LoftonRealty.com" className="flex items-center gap-2 bg-transparent border border-white/30 text-white px-5 py-2.5 rounded-full font-bold hover:bg-white/10 transition-colors">
                      <Mail size={18} /> Email Me
                    </a>
-                   <a href="#" className="flex items-center gap-2 bg-[#0077b5] text-white px-5 py-2.5 rounded-full font-bold hover:brightness-110 transition-colors">
+                   <a 
+                     href="https://linkedin.com/company/lofton-realty" 
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     className="flex items-center gap-2 bg-[#0077b5] text-white px-5 py-2.5 rounded-full font-bold hover:brightness-110 transition-colors"
+                   >
                      <Linkedin size={18} /> LinkedIn
                    </a>
                  </div>

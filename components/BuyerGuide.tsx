@@ -9,6 +9,7 @@ import { Footer } from './Footer';
 import { LocationsSection } from './LocationsSection';
 import { TESTIMONIALS } from '../data';
 import { Testimonial } from '../types';
+import { getOptimizedImageUrl, updateSEO } from '../utils';
 
 // --- Types ---
 
@@ -61,7 +62,7 @@ const MortgageCalculator = () => {
             <input 
               type="range" min="100000" max="2000000" step="5000" 
               value={price} onChange={(e) => setPrice(Number(e.target.value))}
-              className="w-full accent-brand h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              className="w-full accent-brand h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer touch-manipulation py-4"
             />
           </div>
           <div>
@@ -69,22 +70,27 @@ const MortgageCalculator = () => {
             <input 
               type="range" min="3" max="50" step="1" 
               value={downPaymentPercent} onChange={(e) => setDownPaymentPercent(Number(e.target.value))}
-              className="w-full accent-brand h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              className="w-full accent-brand h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer touch-manipulation py-4"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-600 mb-1">Interest Rate (%)</label>
               <input 
-                type="number" step="0.1" value={interestRate} onChange={(e) => setInterestRate(Number(e.target.value))}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-brand outline-none"
+                type="number" step="0.1" min="0" max="15" 
+                value={interestRate} 
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (val >= 0) setInterestRate(val);
+                }}
+                className="w-full border border-gray-300 rounded-md px-3 py-3 focus:ring-2 focus:ring-brand outline-none"
               />
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-600 mb-1">Loan Term (Years)</label>
               <select 
                 value={term} onChange={(e) => setTerm(Number(e.target.value))}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-brand outline-none bg-white"
+                className="w-full border border-gray-300 rounded-md px-3 py-3 focus:ring-2 focus:ring-brand outline-none bg-white"
               >
                 <option value={30}>30 Years</option>
                 <option value={15}>15 Years</option>
@@ -127,6 +133,16 @@ interface BuyerGuideProps {
 
 export const BuyerGuide: React.FC<BuyerGuideProps> = ({ onNavigateHome, onNavigateListings }) => {
   const [activeStep, setActiveStep] = useState<string>('step-1');
+
+  // Update SEO
+  useEffect(() => {
+    updateSEO({
+      title: "First-Time Home Buyer Guide | Lofton Realty",
+      description: "Learn how to buy a house in Texas with our step-by-step guide. From pre-approval to closing, Lofton Realty guides you through every step.",
+      url: "https://loftonrealty.com/buy"
+    });
+    window.scrollTo(0, 0);
+  }, []);
 
   // Steps Data
   const steps: GuideStep[] = [
@@ -248,13 +264,18 @@ export const BuyerGuide: React.FC<BuyerGuideProps> = ({ onNavigateHome, onNaviga
     t.role.toLowerCase().includes('relocation')
   ).slice(0, 3);
 
+  const heroBg = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1920&q=80";
+
   return (
     <div className="font-sans bg-white min-h-screen">
       <Navbar onNavigate={(section) => section === 'listings' ? onNavigateListings() : onNavigateHome()} />
 
       {/* Hero Section */}
       <div className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 bg-charcoal-dark overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center" />
+        <div 
+          className="absolute inset-0 opacity-20 bg-cover bg-center" 
+          style={{ backgroundImage: `url(${getOptimizedImageUrl(heroBg, 1200)})` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-charcoal-dark/90 to-charcoal-dark/70" />
         
         <div className="relative max-w-7xl mx-auto px-5 md:px-10 text-center text-white z-10">

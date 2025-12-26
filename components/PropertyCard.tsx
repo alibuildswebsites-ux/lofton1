@@ -1,15 +1,8 @@
-import React, { useState, MouseEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { Heart, MapPin, Bed, Bath, Maximize, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, MouseEvent, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Heart, MapPin, Bed, Bath, Maximize, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { Property } from '../types';
-
-// Helper to generate Unsplash URLs with specific widths
-const getUnsplashUrl = (url: string, width: number) => {
-  if (url.includes('unsplash.com')) {
-    return url.replace(/&w=\d+/, `&w=${width}`);
-  }
-  return url;
-};
+import { getOptimizedImageUrl } from '../utils';
 
 interface PropertyCardProps {
   property: Property;
@@ -17,9 +10,17 @@ interface PropertyCardProps {
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode = 'grid' }) => {
+  const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Reset loading state when image index changes
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [currentImageIndex]);
 
   const handlePrevImage = (e: MouseEvent) => {
     e.stopPropagation();
@@ -27,6 +28,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
     setCurrentImageIndex((prev) => 
       prev === 0 ? property.images.length - 1 : prev - 1
     );
+    setImageError(false);
   };
 
   const handleNextImage = (e: MouseEvent) => {
@@ -35,6 +37,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
     setCurrentImageIndex((prev) => 
       prev === property.images.length - 1 ? 0 : prev + 1
     );
+    setImageError(false);
   };
 
   const toggleFavorite = (e: MouseEvent) => {
@@ -43,34 +46,60 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
     setIsFavorite(!isFavorite);
   };
 
+  const handleCardClick = () => {
+    navigate(`/properties/${property.id}`);
+  };
+
   const isList = viewMode === 'list';
 
   return (
     <div
+      onClick={handleCardClick}
       className={`group bg-white rounded-[20px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 flex ${isList ? 'flex-col md:flex-row' : 'flex-col hover:-translate-y-2'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      role="article"
+      aria-label={`View details for ${property.address}`}
     >
       {/* Image Carousel Area */}
-      <div className={`relative overflow-hidden bg-gray-200 ${isList ? 'w-full md:w-[320px] h-[240px] md:h-auto shrink-0' : 'h-[240px] lg:h-[260px] w-full'}`}>
+      <div className={`relative overflow-hidden bg-gray-100 ${isList ? 'w-full md:w-[320px] h-[240px] md:h-auto shrink-0' : 'h-[240px] lg:h-[260px] w-full'}`}>
          
+         {/* Skeleton Loader */}
+         {!imageLoaded && !imageError && (
+           <div className="absolute inset-0 bg-gray-200 animate-pulse z-10" />
+         )}
+
          {/* Images */}
-         {property.images.map((img, idx) => (
-           <div 
-             key={idx}
-             className={`absolute inset-0 transition-opacity duration-300 ${idx === currentImageIndex ? 'opacity-100' : 'opacity-0'}`}
-           >
-             <img
-               src={getUnsplashUrl(img, 800)}
-               alt={`Property at ${property.address}`}
-               className="w-full h-full object-cover"
-               loading="lazy"
-             />
+         {!imageError ? (
+           property.images.map((img, idx) => (
+             <div 
+               key={idx}
+               className={`absolute inset-0 transition-opacity duration-500 ${idx === currentImageIndex ? 'opacity-100 z-0' : 'opacity-0 -z-10'}`}
+             >
+               {/* Only render current and adjacent images */}
+               {(idx === currentImageIndex || idx === (currentImageIndex + 1) % property.images.length || idx === (currentImageIndex - 1 + property.images.length) % property.images.length) && (
+                 <img
+                   src={getOptimizedImageUrl(img, 800)}
+                   alt={`Property at ${property.address} - View ${idx + 1}`}
+                   className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${imageLoaded ? 'blur-0' : 'blur-sm'}`}
+                   loading="lazy"
+                   width="400"
+                   height="300"
+                   onLoad={() => idx === currentImageIndex && setImageLoaded(true)}
+                   onError={() => setImageError(true)}
+                 />
+               )}
+             </div>
+           ))
+         ) : (
+           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 text-gray-400">
+             <ImageOff size={48} className="mb-2" />
+             <span className="text-sm font-medium">Image not available</span>
            </div>
-         ))}
+         )}
          
          {/* Status Badge */}
-         <div className="absolute top-4 left-4 z-10">
+         <div className="absolute top-4 left-4 z-20">
            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide text-white shadow-sm ${
              property.status === 'New Listing' ? 'bg-blue-600' :
              property.status === 'Pending' ? 'bg-orange-500' :
@@ -82,17 +111,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
          </div>
 
          {/* Carousel Controls */}
-         {property.images.length > 1 && (
+         {property.images.length > 1 && !imageError && (
            <>
              <button 
                onClick={handlePrevImage}
-               className={`absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 p-1.5 rounded-full text-gray-800 shadow-md hover:bg-white hover:text-brand transition-all duration-200 z-20 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}
+               className={`absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full text-gray-800 shadow-md hover:bg-white hover:text-brand transition-all duration-200 z-20 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}
+               aria-label="Previous image"
              >
                <ChevronLeft size={18} />
              </button>
              <button 
                onClick={handleNextImage}
-               className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 p-1.5 rounded-full text-gray-800 shadow-md hover:bg-white hover:text-brand transition-all duration-200 z-20 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}
+               className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full text-gray-800 shadow-md hover:bg-white hover:text-brand transition-all duration-200 z-20 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}
+               aria-label="Next image"
              >
                <ChevronRight size={18} />
              </button>
@@ -110,13 +141,13 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
          )}
          
          {/* Gradient Overlay */}
-         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
          {/* Favorite Button (Visible on Hover/Active) */}
          <button 
             onClick={toggleFavorite}
             className={`absolute top-4 right-4 z-20 bg-white/90 backdrop-blur p-2 rounded-full shadow-md hover:bg-white transition-all duration-200 ${isFavorite ? 'text-red-500' : 'text-gray-600 hover:text-red-500'} ${isHovered || isFavorite ? 'opacity-100' : 'opacity-0'}`}
-            title="Save to favorites"
+            title={isFavorite ? "Remove from favorites" : "Save to favorites"}
          >
             <Heart size={18} className={isFavorite ? 'fill-current' : ''} />
          </button>
@@ -149,12 +180,11 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
           </div>
         </div>
         
-        <Link 
-          to={`/properties/${property.id}`} // Note: Detail page not implemented in this scope, but Link is correct
-          className="w-full mt-auto border border-gray-200 rounded-lg py-2.5 text-sm font-bold text-charcoal hover:bg-charcoal hover:text-white hover:border-charcoal transition-colors text-center inline-block"
+        <button 
+          className="w-full mt-auto border border-gray-200 rounded-lg py-3 text-sm font-bold text-charcoal hover:bg-charcoal hover:text-white hover:border-charcoal transition-colors text-center inline-block touch-manipulation"
         >
           View Details
-        </Link>
+        </button>
       </div>
     </div>
   );

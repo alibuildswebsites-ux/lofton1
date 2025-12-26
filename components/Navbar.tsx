@@ -3,9 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Menu, X, Grid, BookOpen, TrendingUp, Mail, Info } from 'lucide-react';
 
+// Props are preserved for compatibility but not actively used for routing logic 
+// since we use react-router-dom directly.
 interface NavbarProps {
-  // Props are largely deprecated in favor of Router logic, 
-  // but kept optional for compatibility if strict typing is needed by consumers
   onNavigate?: (section: string) => void; 
   currentView?: string;
 }

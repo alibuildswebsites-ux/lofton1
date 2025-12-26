@@ -3,12 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   TrendingUp, Camera, Handshake, FileCheck, Home, DollarSign, Megaphone, 
   Eye, FileText, Scale, Key, Download, ChevronDown, ChevronUp, CheckCircle2,
-  ArrowRight, Phone, Mail, Calculator, X
+  ArrowRight, Phone, Mail, Calculator, X, AlertCircle, Loader2
 } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { TESTIMONIALS, STATS } from '../data';
 import { Testimonial } from '../types';
+import { getOptimizedImageUrl, updateSEO } from '../utils';
 
 // --- Types ---
 
@@ -28,6 +29,22 @@ interface ValuationForm {
   baths: string;
   sqft: string;
   year: string;
+}
+
+interface ContactFormData {
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  message: string;
+  botField: string; // Honeypot
+}
+
+interface ContactFormErrors {
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
 }
 
 // --- Sub-Components ---
@@ -151,7 +168,7 @@ const ValuationTool = () => {
               className="w-full bg-brand text-white font-bold py-4 rounded-xl hover:bg-brand-dark transition-all shadow-lg shadow-brand/20 flex justify-center items-center"
             >
               {loading ? (
-                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <Loader2 className="animate-spin" />
               ) : (
                 'Get My Estimate'
               )}
@@ -203,6 +220,63 @@ interface SellerGuideProps {
 }
 
 export const SellerGuide: React.FC<SellerGuideProps> = ({ onNavigateHome, onNavigateListings }) => {
+  // Form State
+  const [formData, setFormData] = useState<ContactFormData>({
+    name: '', phone: '', email: '', address: '', message: '', botField: ''
+  });
+  const [errors, setErrors] = useState<ContactFormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  // Update SEO
+  useEffect(() => {
+    updateSEO({
+      title: "Seller's Guide | Home Valuation | Lofton Realty",
+      description: "Sell your Houston home for top dollar with Lofton Realty. Get a free home valuation and expert selling tips from our experienced team.",
+      url: "https://loftonrealty.com/sell"
+    });
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Form Validation & Handling
+  const validateForm = (data: ContactFormData): ContactFormErrors => {
+    const errs: ContactFormErrors = {};
+    if (!data.name.trim()) errs.name = 'Name is required';
+    if (!data.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errs.email = 'Valid email is required';
+    if (!data.phone.trim()) errs.phone = 'Phone is required';
+    return errs;
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name !== 'botField' && errors[name as keyof ContactFormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Honeypot check
+    if (formData.botField) {
+      setIsSuccess(true);
+      return;
+    }
+
+    const validationErrors = validateForm(formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setIsSubmitting(false);
+    setIsSuccess(true);
+    setFormData({ name: '', phone: '', email: '', address: '', message: '', botField: '' });
+  };
+
   const steps: TimelineStep[] = [
     {
       id: 'prep',
@@ -272,10 +346,7 @@ export const SellerGuide: React.FC<SellerGuideProps> = ({ onNavigateHome, onNavi
     t.role.toLowerCase().includes('investor')
   ).slice(0, 3);
 
-  useEffect(() => {
-    document.title = "Sell Your Home | Lofton Realty Seller's Guide";
-    window.scrollTo(0, 0);
-  }, []);
+  const heroBg = "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=80";
 
   return (
     <div className="font-sans bg-white min-h-screen">
@@ -283,7 +354,10 @@ export const SellerGuide: React.FC<SellerGuideProps> = ({ onNavigateHome, onNavi
 
       {/* Hero Section */}
       <div className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-charcoal-dark overflow-hidden">
-        <div className="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center" />
+        <div 
+           className="absolute inset-0 opacity-30 bg-cover bg-center" 
+           style={{ backgroundImage: `url(${getOptimizedImageUrl(heroBg, 1200)})` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal-dark via-charcoal-dark/90 to-transparent" />
         
         <div className="relative max-w-7xl mx-auto px-5 md:px-10 z-10 grid lg:grid-cols-2 gap-12 items-center">
@@ -482,9 +556,10 @@ export const SellerGuide: React.FC<SellerGuideProps> = ({ onNavigateHome, onNavi
             <div className="relative group rounded-2xl overflow-hidden shadow-2xl">
                <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors z-10" />
                <img 
-                 src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80" 
+                 src={getOptimizedImageUrl('https://images.unsplash.com/photo-1600585154340-be6161a56a0c', 800)} 
                  alt="Professional Real Estate Photography"
                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+                 loading="lazy"
                />
                <div className="absolute bottom-6 left-6 z-20 bg-white/90 backdrop-blur px-4 py-2 rounded-lg shadow-lg">
                  <span className="font-bold text-charcoal flex items-center gap-2">
@@ -559,27 +634,92 @@ export const SellerGuide: React.FC<SellerGuideProps> = ({ onNavigateHome, onNavi
               <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">Ready to Sell Your Home?</h2>
               <p className="text-gray-400 text-lg">Schedule a no-obligation consultation with our team.</p>
             </div>
-
-            <form className="relative z-10 space-y-4 max-w-2xl mx-auto">
-              <div className="grid md:grid-cols-2 gap-4">
-                <input type="text" placeholder="Name" className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
-                <input type="tel" placeholder="Phone" className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
+            
+            {isSuccess ? (
+              <div className="relative z-10 text-center py-10 bg-white/5 rounded-2xl border border-white/10">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 text-green-400 rounded-full mb-4">
+                  <CheckCircle2 size={32} />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">Request Received!</h3>
+                <p className="text-gray-300">We'll be in touch shortly to schedule your consultation.</p>
+                <button 
+                  onClick={() => setIsSuccess(false)}
+                  className="mt-6 text-brand font-bold hover:text-white transition-colors"
+                >
+                  Send another request
+                </button>
               </div>
-              <input type="email" placeholder="Email" className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
-              <input type="text" placeholder="Property Address" className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand" />
-              <textarea rows={3} placeholder="Tell us about your selling goals..." className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand resize-none" />
-              
-              <button className="w-full bg-brand text-white font-bold py-4 rounded-xl hover:bg-brand-dark transition-all shadow-lg hover:shadow-brand/20">
-                Schedule Consultation
-              </button>
+            ) : (
+              <form onSubmit={handleFormSubmit} className="relative z-10 space-y-4 max-w-2xl mx-auto">
+                {/* Honeypot Input */}
+                <input 
+                  type="text" 
+                  name="botField" 
+                  value={formData.botField} 
+                  onChange={handleFormChange} 
+                  className="absolute opacity-0 -z-10 h-0 w-0" 
+                  tabIndex={-1} 
+                  autoComplete="off" 
+                />
 
-              <div className="pt-6 text-center">
-                 <p className="text-gray-400 text-sm mb-2">Or call us directly</p>
-                 <a href="tel:7132037661" className="text-white font-bold text-xl hover:text-brand transition-colors">
-                   (713) 203-7661
-                 </a>
-              </div>
-            </form>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="relative">
+                    <input 
+                      type="text" name="name" placeholder="Name *" 
+                      value={formData.name} onChange={handleFormChange}
+                      className={`w-full bg-white/10 border ${errors.name ? 'border-red-400' : 'border-white/20'} rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand`} 
+                    />
+                  </div>
+                  <div className="relative">
+                    <input 
+                      type="tel" name="phone" placeholder="Phone *" 
+                      value={formData.phone} onChange={handleFormChange}
+                      className={`w-full bg-white/10 border ${errors.phone ? 'border-red-400' : 'border-white/20'} rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand`} 
+                    />
+                  </div>
+                </div>
+                <div className="relative">
+                  <input 
+                    type="email" name="email" placeholder="Email *" 
+                    value={formData.email} onChange={handleFormChange}
+                    className={`w-full bg-white/10 border ${errors.email ? 'border-red-400' : 'border-white/20'} rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand`} 
+                  />
+                </div>
+                <input 
+                  type="text" name="address" placeholder="Property Address" 
+                  value={formData.address} onChange={handleFormChange}
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand" 
+                />
+                <textarea 
+                  name="message"
+                  rows={3} 
+                  placeholder="Tell us about your selling goals..." 
+                  value={formData.message} onChange={handleFormChange}
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand resize-none" 
+                />
+                
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-brand text-white font-bold py-4 rounded-xl hover:bg-brand-dark transition-all shadow-lg hover:shadow-brand/20 flex justify-center items-center gap-2"
+                >
+                  {isSubmitting ? <Loader2 className="animate-spin" /> : 'Schedule Consultation'}
+                </button>
+
+                {(Object.keys(errors).length > 0) && (
+                   <p className="text-red-400 text-sm text-center flex items-center justify-center gap-1">
+                     <AlertCircle size={14} /> Please fill in all required fields correctly.
+                   </p>
+                )}
+
+                <div className="pt-6 text-center">
+                   <p className="text-gray-400 text-sm mb-2">Or call us directly</p>
+                   <a href="tel:7132037661" className="text-white font-bold text-xl hover:text-brand transition-colors">
+                     (713) 203-7661
+                   </a>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       </section>

@@ -4,6 +4,7 @@ import { LocationArea } from '../types';
 import { MapPin, TrendingUp, ArrowRight, X, Building } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getOptimizedImageUrl } from '../utils';
 
 export const LocationsSection = () => {
   const [selectedLocation, setSelectedLocation] = useState<LocationArea | null>(null);
@@ -103,11 +104,12 @@ export const LocationsSection = () => {
               transition={{ type: "spring", duration: 0.5 }}
               className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-3xl shadow-2xl z-[101] overflow-hidden max-h-[90vh] flex flex-col"
             >
-              <div className="relative h-48 md:h-64 flex-shrink-0">
+              <div className="relative h-48 md:h-64 flex-shrink-0 bg-gray-100">
                 <img 
-                  src={selectedLocation.image} 
+                  src={getOptimizedImageUrl(selectedLocation.image, 800)} 
                   alt={`${selectedLocation.name} real estate landscape`} 
                   className="w-full h-full object-cover"
+                  loading="eager" // Eager because modal is user-initiated
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <button 

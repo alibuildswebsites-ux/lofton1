@@ -1,3 +1,1 @@
-// This file has been split into ContactFormSection.tsx and Footer.tsx
-// It can be safely deleted.
-export {};
+// This file is deprecated and can be safely deleted.

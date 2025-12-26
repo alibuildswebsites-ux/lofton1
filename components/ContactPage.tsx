@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Phone, Mail, MapPin, Clock, Send, CheckCircle2, 
-  Linkedin, AlertCircle, Calendar, MessageSquare,
-  Facebook, Instagram, Building, ArrowRight, Loader2
+  Linkedin, AlertCircle, MessageSquare,
+  Building, ArrowRight, Loader2
 } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import MapIllustration from './MapIllustration';
+import { MapIllustration } from './Illustrations';
 import { STATS } from '../data';
+import { getOptimizedImageUrl, updateSEO } from '../utils';
 
 // --- Types ---
 
@@ -21,6 +22,7 @@ interface FormData {
   location: string;
   message: string;
   times: string[];
+  botField: string; // Honeypot
 }
 
 interface FormErrors {
@@ -53,7 +55,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
     interest: 'Buying a Home',
     location: 'Houston, TX',
     message: '',
-    times: []
+    times: [],
+    botField: ''
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -62,8 +65,12 @@ export const ContactPage: React.FC<ContactPageProps> = ({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
+    updateSEO({
+      title: "Contact Us | Lofton Realty",
+      description: "Get in touch with Lofton Realty. Call, email, or visit us for your Houston real estate needs. Available 24/7.",
+      url: "https://loftonrealty.com/contact"
+    });
     window.scrollTo(0, 0);
-    document.title = "Contact Us | Lofton Realty";
   }, []);
 
   // --- Validation Logic ---
@@ -92,7 +99,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    if (touched[name]) {
+    if (name !== 'botField' && touched[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: undefined
@@ -120,6 +127,13 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Honeypot check
+    if (formData.botField) {
+      setIsSuccess(true);
+      return;
+    }
+
     setTouched({ name: true, email: true, phone: true, message: true });
     
     const validationErrors = validate(formData);
@@ -137,7 +151,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
     setIsSuccess(true);
     setFormData({
       name: '', email: '', phone: '', method: 'Email', interest: 'Buying a Home',
-      location: 'Houston, TX', message: '', times: []
+      location: 'Houston, TX', message: '', times: [], botField: ''
     });
     setTouched({});
     
@@ -156,7 +170,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-charcoal-dark overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center" />
+        <div 
+          className="absolute inset-0 opacity-20 bg-cover bg-center" 
+          style={{ backgroundImage: `url(${getOptimizedImageUrl('https://images.unsplash.com/photo-1497366216548-37526070297c', 1200)})` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-charcoal-dark/90 to-charcoal-dark/60" />
         
         <div className="relative max-w-7xl mx-auto px-5 md:px-10 text-center z-10">
@@ -209,6 +226,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({
               <p className="text-sm text-gray-500 mb-6">{item.sub}</p>
               <a 
                 href={item.href}
+                target={item.action === 'Get Directions' ? "_blank" : undefined}
+                rel={item.action === 'Get Directions' ? "noopener noreferrer" : undefined}
                 className="mt-auto text-brand font-bold border-b-2 border-brand/20 hover:border-brand pb-0.5 transition-colors"
               >
                 {item.action}
@@ -230,6 +249,17 @@ export const ContactPage: React.FC<ContactPageProps> = ({
             </div>
 
             <form onSubmit={handleSubmit} className="bg-white p-8 md:p-10 rounded-3xl shadow-sm border border-gray-100">
+              {/* Honeypot */}
+              <input 
+                type="text" 
+                name="botField" 
+                value={formData.botField} 
+                onChange={handleChange} 
+                className="absolute opacity-0 -z-10 h-0 w-0" 
+                tabIndex={-1} 
+                autoComplete="off" 
+              />
+
               <div className="grid md:grid-cols-2 gap-8 mb-8">
                 {/* Name */}
                 <div className="space-y-2">

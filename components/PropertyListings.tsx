@@ -7,6 +7,7 @@ import { Property } from '../types';
 import { Filter, SlidersHorizontal, ChevronDown, Grid, List, Search, X, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
+import { updateSEO } from '../utils';
 
 // --- Types ---
 
@@ -52,6 +53,15 @@ export const PropertyListings: React.FC<PropertyListingsProps> = ({ onNavigateHo
 
   // --- Effects ---
   
+  // Update SEO
+  useEffect(() => {
+    updateSEO({
+      title: "Homes for Sale in Houston, TX | Lofton Realty",
+      description: "Browse exclusive real estate listings in Houston, Galveston, Austin, and the Gulf Coast. Find your dream home with Lofton Realty.",
+      url: "https://loftonrealty.com/properties"
+    });
+  }, []);
+
   // Parse URL query parameters for initial filter state
   useEffect(() => {
     const params = new URLSearchParams(locationParams.search);
@@ -250,7 +260,7 @@ export const PropertyListings: React.FC<PropertyListingsProps> = ({ onNavigateHo
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
-      <Navbar /> {/* Note: Ensure Navbar accepts navigation props in real integration */}
+      <Navbar /> 
       
       {/* Header Area */}
       <div className="bg-white border-b border-gray-200 pt-28 pb-8">

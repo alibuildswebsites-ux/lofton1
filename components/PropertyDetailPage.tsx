@@ -6,34 +6,86 @@ import { PROPERTIES } from '../data';
 import { PropertyCard } from './PropertyCard';
 import { 
   MapPin, Bed, Bath, Maximize, Calendar, Ruler, Phone, Mail, 
-  ChevronLeft, ChevronRight, CheckCircle2, ArrowRight, Home, Building 
+  ChevronLeft, ChevronRight, CheckCircle2, ArrowRight, Home, Building, ImageOff
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getOptimizedImageUrl, updateSEO, injectJSONLD } from '../utils';
 
 export const PropertyDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeImage, setActiveImage] = useState(0);
+  const [imageError, setImageError] = useState(false);
+  const [mainImageLoaded, setMainImageLoaded] = useState(false);
 
   // Find Property
   const property = PROPERTIES.find(p => p.id === id);
 
   // SEO & Scroll handling
   useEffect(() => {
-    if (property) {
-      document.title = `${property.address} – ${property.city}, ${property.state} | Lofton Realty`;
-      
-      // Update meta description
-      let metaDescription = document.querySelector('meta[name="description"]');
-      if (!metaDescription) {
-        metaDescription = document.createElement('meta');
-        metaDescription.setAttribute('name', 'description');
-        document.head.appendChild(metaDescription);
-      }
-      metaDescription.setAttribute('content', `For Sale: ${property.beds} Bed, ${property.baths} Bath home at ${property.address} in ${property.city}. ${property.description?.substring(0, 100)}...`);
-    }
     window.scrollTo(0, 0);
+
+    if (property) {
+      // Dynamic Meta Tags
+      updateSEO({
+        title: `${property.address} | Homes for Sale in ${property.city}, ${property.state}`,
+        description: `View details for ${property.address}. ${property.beds} Bed, ${property.baths} Bath, ${property.price}. ${property.description?.substring(0, 120)}...`,
+        image: property.images[0],
+        url: `https://loftonrealty.com/properties/${property.id}`,
+        type: 'article'
+      });
+
+      // Structured Data (Schema.org)
+      injectJSONLD({
+        "@context": "https://schema.org",
+        "@type": "SingleFamilyResidence",
+        "name": property.address,
+        "description": property.description,
+        "numberOfRooms": property.beds + property.baths, // Approximate
+        "occupancy": {
+          "@type": "QuantitativeValue",
+          "value": property.beds
+        },
+        "floorSize": {
+          "@type": "QuantitativeValue",
+          "value": property.sqft.replace(/,/g, ''),
+          "unitCode": "FTK"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": property.address,
+          "addressLocality": property.city,
+          "addressRegion": property.state,
+          "postalCode": property.zip,
+          "addressCountry": "US"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": "29.7604", // Placeholder for demo
+          "longitude": "-95.3698"
+        },
+        "image": property.images,
+        "offers": {
+          "@type": "Offer",
+          "price": property.price.replace(/[^0-9.]/g, ''),
+          "priceCurrency": "USD",
+          "availability": property.status === 'Pending' ? "https://schema.org/Sold" : "https://schema.org/InStock"
+        }
+      });
+    }
   }, [property, id]);
+
+  // Reset active image when property changes
+  useEffect(() => {
+      setActiveImage(0);
+      setImageError(false);
+      setMainImageLoaded(false);
+  }, [id]);
+
+  // Reset loading state when active image changes
+  useEffect(() => {
+    setMainImageLoaded(false);
+  }, [activeImage]);
 
   if (!property) {
     return (
@@ -64,10 +116,12 @@ export const PropertyDetailPage = () => {
 
   const handleNextImage = () => {
     setActiveImage((prev) => (prev + 1) % property.images.length);
+    setImageError(false);
   };
 
   const handlePrevImage = () => {
     setActiveImage((prev) => (prev - 1 + property.images.length) % property.images.length);
+    setImageError(false);
   };
 
   return (
@@ -113,34 +167,54 @@ export const PropertyDetailPage = () => {
         </div>
 
         {/* Hero Image Gallery */}
-        <div className="grid lg:grid-cols-[2fr_1fr] gap-4 mb-12 h-[500px] lg:h-[600px]">
+        <div className="grid lg:grid-cols-[2fr_1fr] gap-4 mb-12 h-[400px] md:h-[500px] lg:h-[600px]">
           {/* Main Image */}
-          <div className="relative rounded-2xl overflow-hidden bg-gray-200 h-full group">
-             <img 
-               src={property.images[activeImage]} 
-               alt={`${property.address} view ${activeImage + 1}`}
-               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-             />
+          <div className="relative rounded-2xl overflow-hidden bg-gray-100 h-full group">
+             
+             {/* Skeleton Placeholder */}
+             {!mainImageLoaded && !imageError && (
+               <div className="absolute inset-0 bg-gray-200 animate-pulse z-10" />
+             )}
+
+             {!imageError ? (
+               <img 
+                 src={getOptimizedImageUrl(property.images[activeImage], 1200)} 
+                 alt={`Property at ${property.address} - Main View`}
+                 className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${mainImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                 onError={() => setImageError(true)}
+                 onLoad={() => setMainImageLoaded(true)}
+                 loading="eager"
+               />
+             ) : (
+               <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 text-gray-400">
+                  <ImageOff size={64} className="mb-4" />
+                  <p className="font-medium">Image not available</p>
+               </div>
+             )}
              
              {/* Controls */}
-             <button 
-               onClick={handlePrevImage}
-               className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-               aria-label="Previous image"
-             >
-               <ChevronLeft size={24} />
-             </button>
-             <button 
-               onClick={handleNextImage}
-               className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100"
-               aria-label="Next image"
-             >
-               <ChevronRight size={24} />
-             </button>
-             
-             <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
-               {activeImage + 1} / {property.images.length}
-             </div>
+             {property.images.length > 1 && !imageError && (
+               <>
+                 <button 
+                   onClick={handlePrevImage}
+                   className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
+                   aria-label="Previous image"
+                 >
+                   <ChevronLeft size={24} />
+                 </button>
+                 <button 
+                   onClick={handleNextImage}
+                   className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-3 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 z-20"
+                   aria-label="Next image"
+                 >
+                   <ChevronRight size={24} />
+                 </button>
+                 
+                 <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm z-20">
+                   {activeImage + 1} / {property.images.length}
+                 </div>
+               </>
+             )}
           </div>
 
           {/* Thumbnails Grid (Desktop) */}
@@ -148,10 +222,16 @@ export const PropertyDetailPage = () => {
             {property.images.slice(0, 3).map((img, idx) => (
               <button 
                 key={idx} 
-                onClick={() => setActiveImage(idx)}
-                className={`relative rounded-xl overflow-hidden w-full h-full cursor-pointer transition-all ${activeImage === idx ? 'ring-4 ring-brand' : 'opacity-80 hover:opacity-100'}`}
+                onClick={() => { setActiveImage(idx); setImageError(false); }}
+                className={`relative rounded-xl overflow-hidden w-full h-full cursor-pointer transition-all bg-gray-100 ${activeImage === idx ? 'ring-4 ring-brand' : 'opacity-80 hover:opacity-100'}`}
               >
-                <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                <img 
+                  src={getOptimizedImageUrl(img, 400)} 
+                  alt={`Property at ${property.address} - View ${idx + 1}`} 
+                  className="w-full h-full object-cover" 
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center'); e.currentTarget.parentElement!.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'; }}
+                />
                 {idx === 2 && property.images.length > 3 && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-xl">
                     +{property.images.length - 3}
@@ -249,7 +329,12 @@ export const PropertyDetailPage = () => {
                 <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                    <div className="flex items-center gap-4 mb-6">
                      <div className="w-16 h-16 rounded-full bg-gray-100 overflow-hidden border-2 border-brand">
-                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=200&q=80" alt="Agent" className="w-full h-full object-cover" />
+                        <img 
+                          src={getOptimizedImageUrl('https://images.unsplash.com/photo-1560250097-0b93528c311a', 200)} 
+                          alt="Agent" 
+                          className="w-full h-full object-cover"
+                          onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Jared+Lofton&background=4ADE80&color=fff"; }}
+                        />
                      </div>
                      <div>
                        <h3 className="font-bold text-lg text-charcoal">Jared Lofton, MBA</h3>
