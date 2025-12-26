@@ -2,31 +2,17 @@ import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, MessageSquare, TrendingUp, Heart, Award, ShieldCheck, 
-  Clock, Target, Phone, Mail, Linkedin, MapPin, Building, GraduationCap, CheckCircle2, ArrowRight, Home
+  Clock, Phone, Mail, Linkedin, MapPin, Building, GraduationCap, CheckCircle2, ArrowRight, Home
 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { LocationsSection } from './LocationsSection';
 import { TestimonialsSection } from './TestimonialsSection';
 import { getOptimizedImageUrl, updateSEO } from '../utils';
 
-// --- Types ---
-
-interface AboutPageProps {
-  onNavigateHome: () => void;
-  onNavigateListings: () => void;
-  onNavigateGuide: () => void;
-  onNavigateSeller: () => void;
-  onNavigateContact: () => void;
-}
-
-export const AboutPage: React.FC<AboutPageProps> = ({ 
-  onNavigateHome, 
-  onNavigateListings,
-  onNavigateGuide,
-  onNavigateSeller,
-  onNavigateContact
-}) => {
+export const AboutPage = () => {
+  const navigate = useNavigate();
 
   useEffect(() => {
     updateSEO({
@@ -83,13 +69,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
-      <Navbar onNavigate={(section) => {
-        if (section === 'listings') onNavigateListings();
-        else if (section === 'guide') onNavigateGuide();
-        else if (section === 'seller') onNavigateSeller();
-        else if (section === 'contact') onNavigateContact();
-        else onNavigateHome();
-      }} currentView="about" />
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-charcoal-dark overflow-hidden">
@@ -275,7 +255,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                     In a crowded market, experience and integrity matter. Here is how we deliver superior results for our clients every single day.
                   </p>
                   <button 
-                    onClick={onNavigateContact}
+                    onClick={() => navigate('/contact')}
                     className="bg-charcoal text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-black transition-colors"
                   >
                     Experience the Difference
@@ -375,18 +355,18 @@ export const AboutPage: React.FC<AboutPageProps> = ({
            <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">Join 500+ satisfied clients who chose relationship-driven real estate. Your journey starts here.</p>
            
            <div className="flex flex-col sm:flex-row justify-center gap-4">
-             <button 
-               onClick={onNavigateListings}
-               className="bg-charcoal text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-black transition-colors shadow-lg"
+             <Link 
+               to="/properties"
+               className="bg-charcoal text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-black transition-colors shadow-lg text-center"
              >
                Start Your Home Search
-             </button>
-             <button 
-               onClick={onNavigateContact}
+             </Link>
+             <Link 
+               to="/contact"
                className="bg-white text-charcoal px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-colors shadow-lg border border-gray-200 flex items-center justify-center gap-2"
              >
                Get a Free Consultation <ArrowRight size={20} />
-             </button>
+             </Link>
            </div>
         </div>
       </section>

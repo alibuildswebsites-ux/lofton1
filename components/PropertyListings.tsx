@@ -20,10 +20,6 @@ interface FilterState {
   type: 'all' | 'buy' | 'rent';
 }
 
-interface PropertyListingsProps {
-  onNavigateHome: () => void;
-}
-
 // --- Helper Functions ---
 
 const parsePrice = (priceStr: string): number => {
@@ -33,7 +29,7 @@ const parsePrice = (priceStr: string): number => {
 
 const locations = ['Houston, TX', 'Galveston, TX', 'Austin, TX', 'Louisiana', 'Mississippi', 'Florida'];
 
-export const PropertyListings: React.FC<PropertyListingsProps> = ({ onNavigateHome }) => {
+export const PropertyListings = () => {
   // --- State ---
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc' | 'sqft-desc'>('newest');

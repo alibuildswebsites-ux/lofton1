@@ -1,23 +1,8 @@
 import React, { useEffect } from 'react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { Link } from 'react-router-dom';
 
-interface TermsOfServiceProps {
-  onNavigateHome: () => void;
-  onNavigateListings: () => void;
-  onNavigateGuide: () => void;
-  onNavigateSeller: () => void;
-  onNavigateContact: () => void;
-}
-
-export const TermsOfService: React.FC<TermsOfServiceProps> = ({ 
-  onNavigateHome,
-  onNavigateListings,
-  onNavigateGuide,
-  onNavigateSeller,
-  onNavigateContact
-}) => {
+export const TermsOfService = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -26,13 +11,7 @@ export const TermsOfService: React.FC<TermsOfServiceProps> = ({
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
-      <Navbar onNavigate={(section) => {
-        if (section === 'listings') onNavigateListings();
-        else if (section === 'guide') onNavigateGuide();
-        else if (section === 'seller') onNavigateSeller();
-        else if (section === 'contact') onNavigateContact();
-        else onNavigateHome();
-      }} />
+      <Navbar />
 
       <main className="pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="max-w-4xl mx-auto px-5 md:px-10">

@@ -4,6 +4,7 @@ import {
   DollarSign, Home, Search, FileText, ClipboardCheck, Key, Award, 
   ChevronDown, ChevronUp, Calculator, Phone, Mail, ArrowRight, CheckCircle2
 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { LocationsSection } from './LocationsSection';
@@ -126,13 +127,9 @@ const MortgageCalculator = () => {
 
 // --- Main Page Component ---
 
-interface BuyerGuideProps {
-  onNavigateHome: () => void;
-  onNavigateListings: () => void;
-}
-
-export const BuyerGuide: React.FC<BuyerGuideProps> = ({ onNavigateHome, onNavigateListings }) => {
+export const BuyerGuide = () => {
   const [activeStep, setActiveStep] = useState<string>('step-1');
+  const navigate = useNavigate();
 
   // Update SEO
   useEffect(() => {
@@ -182,7 +179,7 @@ export const BuyerGuide: React.FC<BuyerGuideProps> = ({ onNavigateHome, onNaviga
         'Attend open houses to get a feel for different neighborhoods.',
         'Use virtual tours to narrow down your list efficiently.'
       ],
-      cta: { text: 'View Current Listings', action: onNavigateListings }
+      cta: { text: 'View Current Listings', action: () => navigate('/properties') }
     },
     {
       id: 'step-4',
@@ -268,7 +265,7 @@ export const BuyerGuide: React.FC<BuyerGuideProps> = ({ onNavigateHome, onNaviga
 
   return (
     <div className="font-sans bg-white min-h-screen">
-      <Navbar onNavigate={(section) => section === 'listings' ? onNavigateListings() : onNavigateHome()} />
+      <Navbar />
 
       {/* Hero Section */}
       <div className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 bg-charcoal-dark overflow-hidden">

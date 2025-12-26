@@ -2,21 +2,7 @@ import React, { useEffect } from 'react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 
-interface PrivacyPolicyProps {
-  onNavigateHome: () => void;
-  onNavigateListings: () => void;
-  onNavigateGuide: () => void;
-  onNavigateSeller: () => void;
-  onNavigateContact: () => void;
-}
-
-export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ 
-  onNavigateHome,
-  onNavigateListings,
-  onNavigateGuide,
-  onNavigateSeller,
-  onNavigateContact
-}) => {
+export const PrivacyPolicy = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -25,13 +11,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
-      <Navbar onNavigate={(section) => {
-        if (section === 'listings') onNavigateListings();
-        else if (section === 'guide') onNavigateGuide();
-        else if (section === 'seller') onNavigateSeller();
-        else if (section === 'contact') onNavigateContact();
-        else onNavigateHome();
-      }} />
+      <Navbar />
 
       <main className="pt-32 pb-20 md:pt-40 md:pb-28">
         <div className="max-w-4xl mx-auto px-5 md:px-10">

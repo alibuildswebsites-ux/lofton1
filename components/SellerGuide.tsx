@@ -214,12 +214,7 @@ const ValuationTool = () => {
 
 // --- Main Page Component ---
 
-interface SellerGuideProps {
-  onNavigateHome: () => void;
-  onNavigateListings: () => void;
-}
-
-export const SellerGuide: React.FC<SellerGuideProps> = ({ onNavigateHome, onNavigateListings }) => {
+export const SellerGuide = () => {
   // Form State
   const [formData, setFormData] = useState<ContactFormData>({
     name: '', phone: '', email: '', address: '', message: '', botField: ''
@@ -350,7 +345,7 @@ export const SellerGuide: React.FC<SellerGuideProps> = ({ onNavigateHome, onNavi
 
   return (
     <div className="font-sans bg-white min-h-screen">
-      <Navbar onNavigate={(section) => section === 'listings' ? onNavigateListings() : onNavigateHome()} currentView="seller" />
+      <Navbar />
 
       {/* Hero Section */}
       <div className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-charcoal-dark overflow-hidden">

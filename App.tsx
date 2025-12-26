@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { ScrollToTop } from './components/ScrollToTop';
 import { Loader2 } from 'lucide-react';
 
@@ -25,106 +25,20 @@ const PageLoader = () => (
 );
 
 function App() {
-  const navigate = useNavigate();
-
-  // Helper to maintain compatibility with existing component props
-  const navigateTo = (path: string) => () => navigate(path);
-
   return (
     <>
       <ScrollToTop />
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route 
-            path="/" 
-            element={<LoftonRealtyHome />} 
-          />
-          
-          <Route 
-            path="/properties" 
-            element={
-              <PropertyListings 
-                onNavigateHome={navigateTo('/')} 
-              />
-            } 
-          />
-
-          <Route 
-            path="/properties/:id" 
-            element={<PropertyDetailPage />} 
-          />
-
-          <Route 
-            path="/buy" 
-            element={
-              <BuyerGuide 
-                onNavigateHome={navigateTo('/')} 
-                onNavigateListings={navigateTo('/properties')}
-              />
-            } 
-          />
-
-          <Route 
-            path="/sell" 
-            element={
-              <SellerGuide 
-                onNavigateHome={navigateTo('/')}
-                onNavigateListings={navigateTo('/properties')}
-              />
-            } 
-          />
-
-          <Route 
-            path="/contact" 
-            element={
-              <ContactPage 
-                onNavigateHome={navigateTo('/')}
-                onNavigateListings={navigateTo('/properties')}
-                onNavigateGuide={navigateTo('/buy')}
-                onNavigateSeller={navigateTo('/sell')}
-              />
-            } 
-          />
-
-          <Route 
-            path="/about" 
-            element={
-              <AboutPage 
-                onNavigateHome={navigateTo('/')}
-                onNavigateListings={navigateTo('/properties')}
-                onNavigateGuide={navigateTo('/buy')}
-                onNavigateSeller={navigateTo('/sell')}
-                onNavigateContact={navigateTo('/contact')}
-              />
-            } 
-          />
-
-          <Route 
-            path="/privacy" 
-            element={
-              <PrivacyPolicy 
-                onNavigateHome={navigateTo('/')}
-                onNavigateListings={navigateTo('/properties')}
-                onNavigateGuide={navigateTo('/buy')}
-                onNavigateSeller={navigateTo('/sell')}
-                onNavigateContact={navigateTo('/contact')}
-              />
-            } 
-          />
-
-          <Route 
-            path="/terms" 
-            element={
-              <TermsOfService 
-                onNavigateHome={navigateTo('/')}
-                onNavigateListings={navigateTo('/properties')}
-                onNavigateGuide={navigateTo('/buy')}
-                onNavigateSeller={navigateTo('/sell')}
-                onNavigateContact={navigateTo('/contact')}
-              />
-            } 
-          />
-
+          <Route path="/" element={<LoftonRealtyHome />} />
+          <Route path="/properties" element={<PropertyListings />} />
+          <Route path="/properties/:id" element={<PropertyDetailPage />} />
+          <Route path="/buy" element={<BuyerGuide />} />
+          <Route path="/sell" element={<SellerGuide />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

@@ -1,25 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Menu, X, Grid, BookOpen, TrendingUp, Mail, Info } from 'lucide-react';
 
-// Props are preserved for compatibility but not actively used for routing logic 
-// since we use react-router-dom directly.
-interface NavbarProps {
-  onNavigate?: (section: string) => void; 
-  currentView?: string;
-}
-
-export const Navbar = ({ }: NavbarProps) => {
+export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const location = useLocation();
   const currentPath = location.pathname;
-
-  // Refs for Accessibility
-  const menuBtnRef = useRef<HTMLButtonElement>(null);
-  const drawerRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -141,7 +130,6 @@ export const Navbar = ({ }: NavbarProps) => {
 
           {/* Mobile Toggle */}
           <button 
-            ref={menuBtnRef}
             className="lg:hidden text-gray-800 p-2 z-[101] relative rounded-md active:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
@@ -193,7 +181,6 @@ export const Navbar = ({ }: NavbarProps) => {
             {/* Slide-in Drawer */}
             <motion.div
               id="mobile-menu-drawer"
-              ref={drawerRef}
               role="dialog"
               aria-modal="true"
               aria-label="Mobile Navigation"

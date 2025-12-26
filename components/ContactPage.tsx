@@ -5,6 +5,7 @@ import {
   Linkedin, AlertCircle, MessageSquare,
   Building, ArrowRight, Loader2
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { MapIllustration } from './Illustrations';
@@ -34,19 +35,8 @@ interface FormErrors {
 
 // --- Main Component ---
 
-interface ContactPageProps {
-  onNavigateHome: () => void;
-  onNavigateListings: () => void;
-  onNavigateGuide: () => void;
-  onNavigateSeller: () => void;
-}
-
-export const ContactPage: React.FC<ContactPageProps> = ({ 
-  onNavigateHome, 
-  onNavigateListings,
-  onNavigateGuide,
-  onNavigateSeller
-}) => {
+export const ContactPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -161,12 +151,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
-      <Navbar onNavigate={(section) => {
-        if (section === 'listings') onNavigateListings();
-        else if (section === 'guide') onNavigateGuide();
-        else if (section === 'seller') onNavigateSeller();
-        else onNavigateHome();
-      }} currentView="contact" />
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 bg-charcoal-dark overflow-hidden">
@@ -487,9 +472,9 @@ export const ContactPage: React.FC<ContactPageProps> = ({
               </h3>
               <div className="space-y-3">
                 {[
-                   { label: 'Read our Buyer\'s Guide', action: onNavigateGuide },
-                   { label: 'Read our Seller\'s Guide', action: onNavigateSeller },
-                   { label: 'View Current Listings', action: onNavigateListings },
+                   { label: 'Read our Buyer\'s Guide', action: () => navigate('/buy') },
+                   { label: 'Read our Seller\'s Guide', action: () => navigate('/sell') },
+                   { label: 'View Current Listings', action: () => navigate('/properties') },
                 ].map((link, i) => (
                   <button 
                     key={i}
