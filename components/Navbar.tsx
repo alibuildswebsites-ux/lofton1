@@ -34,11 +34,11 @@ export const Navbar = () => {
   // Nav Items
   const navLinks = [
     { name: 'Home', path: '/', icon: Home },
-    { name: 'About', path: '/about', icon: Info },
-    { name: 'Properties', path: '/properties', icon: Grid },
-    { name: "Buyer's Guide", path: '/buy', icon: BookOpen },
-    { name: "Seller's Guide", path: '/sell', icon: TrendingUp },
-    { name: "Contact", path: '/contact', icon: Mail },
+    { name: 'About Us', path: '/about-us', icon: Info },
+    { name: 'Property Listings', path: '/property-listings', icon: Grid },
+    { name: 'Buyer’s Guide', path: '/buyers-guide', icon: BookOpen },
+    { name: 'Seller’s Guide', path: '/sellers-guide', icon: TrendingUp },
+    { name: 'Contact Us', path: '/contact-us', icon: Mail },
   ];
 
   // Mobile Drawer Variants
@@ -121,7 +121,7 @@ export const Navbar = () => {
           {/* Desktop CTA (Right) */}
           <div className="hidden lg:block pl-4">
             <Link 
-              to="/contact"
+              to="/contact-us"
               className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 inline-block"
             >
               Book Consultation
@@ -209,7 +209,7 @@ export const Navbar = () => {
               </div>
               
               <Link 
-                to="/contact"
+                to="/contact-us"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform w-full mt-auto text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand"
               >

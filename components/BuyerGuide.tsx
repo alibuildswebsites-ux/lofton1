@@ -11,6 +11,7 @@ import { LocationsSection } from './LocationsSection';
 import { TESTIMONIALS } from '../data';
 import { Testimonial } from '../types';
 import { getOptimizedImageUrl, updateSEO } from '../utils';
+import { SharedContactForm } from './SharedContactForm';
 
 // --- Types ---
 
@@ -136,7 +137,7 @@ export const BuyerGuide = () => {
     updateSEO({
       title: "First-Time Home Buyer Guide | Lofton Realty",
       description: "Learn how to buy a house in Texas with our step-by-step guide. From pre-approval to closing, Lofton Realty guides you through every step.",
-      url: "https://loftonrealty.com/buy"
+      url: "https://loftonrealty.com/buyers-guide"
     });
     window.scrollTo(0, 0);
   }, []);
@@ -179,7 +180,7 @@ export const BuyerGuide = () => {
         'Attend open houses to get a feel for different neighborhoods.',
         'Use virtual tours to narrow down your list efficiently.'
       ],
-      cta: { text: 'View Current Listings', action: () => navigate('/properties') }
+      cta: { text: 'View Current Listings', action: () => navigate('/property-listings') }
     },
     {
       id: 'step-4',
@@ -450,20 +451,29 @@ export const BuyerGuide = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-charcoal-dark text-white text-center">
-        <div className="max-w-3xl mx-auto px-5">
-           <h2 className="text-3xl md:text-4xl font-extrabold mb-6">Ready to Start Your Home Buying Journey?</h2>
-           <p className="text-xl text-gray-400 mb-10">Let's find your perfect home together. Schedule a free consultation with our experts today.</p>
-           
-           <div className="flex flex-col sm:flex-row justify-center gap-4">
-             <button className="bg-brand text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-brand-dark transition-colors shadow-lg shadow-brand/20">
-               Schedule a Consultation
-             </button>
-             <a href="tel:7132037661" className="flex items-center justify-center gap-2 bg-transparent border border-gray-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition-colors">
-               <Phone size={20} /> (713) 203-7661
-             </a>
-           </div>
+      {/* Contact Form CTA (Dark Card Theme) */}
+      <section className="py-24 bg-white">
+        <div className="max-w-4xl mx-auto px-5 md:px-10">
+          <div className="bg-charcoal-dark rounded-[32px] p-8 md:p-16 overflow-hidden relative shadow-2xl">
+            {/* Decor */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand rounded-full blur-[80px] opacity-20 translate-x-1/2 -translate-y-1/2" />
+
+            <div className="relative z-10 text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">Ready to Start Your Journey?</h2>
+              <p className="text-gray-400 text-lg">Schedule a free consultation with our buying experts.</p>
+            </div>
+            
+            <div className="relative z-10 max-w-2xl mx-auto">
+               <SharedContactForm variant="dark" />
+            </div>
+
+            <div className="relative z-10 pt-6 text-center">
+                <p className="text-gray-400 text-sm mb-2">Or call us directly</p>
+                <a href="tel:7132037661" className="text-white font-bold text-xl hover:text-brand transition-colors">
+                  (713) 203-7661
+                </a>
+            </div>
+          </div>
         </div>
       </section>
 

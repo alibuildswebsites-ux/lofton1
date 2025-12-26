@@ -21,7 +21,7 @@ export const LocationsSection = () => {
 
   const handleNavigateToProperties = (locationName: string) => {
     // Navigate to properties page with location filter
-    navigate(`/properties?location=${encodeURIComponent(locationName)}`);
+    navigate(`/property-listings?location=${encodeURIComponent(locationName)}`);
     setSelectedLocation(null);
   };
 
@@ -73,7 +73,7 @@ export const LocationsSection = () => {
         </div>
 
         <div className="mt-12 text-center">
-          <Link to="/contact" className="text-charcoal font-bold border-b-2 border-brand/20 hover:border-brand pb-0.5 transition-colors">
+          <Link to="/contact-us" className="text-charcoal font-bold border-b-2 border-brand/20 hover:border-brand pb-0.5 transition-colors">
             Contact us for market specifics
           </Link>
         </div>

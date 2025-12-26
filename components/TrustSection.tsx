@@ -35,7 +35,7 @@ export const TrustSection = () => {
         {/* CTA */}
         <div className="text-center">
             <Link 
-              to="/about"
+              to="/about-us"
               className="bg-charcoal text-white px-8 py-3.5 rounded-full font-bold hover:bg-black transition-colors shadow-lg shadow-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 inline-block"
             >
               Meet The Team

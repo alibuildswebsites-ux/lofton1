@@ -14,7 +14,7 @@ export const FeaturedProperties = () => {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-charcoal tracking-tight">Featured Properties</h2>
           </div>
           <Link 
-            to="/properties"
+            to="/property-listings"
             className="hidden md:flex items-center gap-2 text-charcoal font-bold hover:text-brand transition-colors rounded-lg px-2 py-1 -ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
           >
             View All Listings <ArrowRight size={20} />
@@ -29,7 +29,7 @@ export const FeaturedProperties = () => {
         
         <div className="mt-10 text-center md:hidden">
             <Link 
-              to="/properties"
+              to="/property-listings"
               className="inline-flex items-center gap-2 text-charcoal font-bold hover:text-brand transition-colors rounded-lg px-4 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
             >
               View All Listings <ArrowRight size={20} />

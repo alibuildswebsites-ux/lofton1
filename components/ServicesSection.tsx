@@ -23,9 +23,9 @@ export const ServicesSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[30px]">
           {SERVICES.map((service, idx) => {
             // Determine link based on service title for better UX
-            const linkPath = service.title.includes('Buy') || service.title.includes('Home') ? '/buy' :
-                           service.title.includes('Sale') || service.title.includes('Sell') ? '/sell' :
-                           '/contact';
+            const linkPath = service.title.includes('Buy') || service.title.includes('Home') ? '/buyers-guide' :
+                           service.title.includes('Sale') || service.title.includes('Sell') ? '/sellers-guide' :
+                           '/contact-us';
 
             return (
               <div

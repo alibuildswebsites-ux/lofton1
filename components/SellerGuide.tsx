@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   TrendingUp, Camera, Handshake, FileCheck, Home, DollarSign, Megaphone, 
   Eye, FileText, Scale, Key, Download, ChevronDown, ChevronUp, CheckCircle2,
-  ArrowRight, Phone, Mail, Calculator, X, AlertCircle, Loader2
+  ArrowRight, Calculator, Loader2
 } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { TESTIMONIALS, STATS } from '../data';
-import { Testimonial } from '../types';
+import { TESTIMONIALS } from '../data';
 import { getOptimizedImageUrl, updateSEO } from '../utils';
+import { SharedContactForm } from './SharedContactForm';
 
 // --- Types ---
 
@@ -29,22 +29,6 @@ interface ValuationForm {
   baths: string;
   sqft: string;
   year: string;
-}
-
-interface ContactFormData {
-  name: string;
-  phone: string;
-  email: string;
-  address: string;
-  message: string;
-  botField: string; // Honeypot
-}
-
-interface ContactFormErrors {
-  name?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
 }
 
 // --- Sub-Components ---
@@ -215,62 +199,14 @@ const ValuationTool = () => {
 // --- Main Page Component ---
 
 export const SellerGuide = () => {
-  // Form State
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: '', phone: '', email: '', address: '', message: '', botField: ''
-  });
-  const [errors, setErrors] = useState<ContactFormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  // Update SEO
   useEffect(() => {
     updateSEO({
       title: "Seller's Guide | Home Valuation | Lofton Realty",
       description: "Sell your Houston home for top dollar with Lofton Realty. Get a free home valuation and expert selling tips from our experienced team.",
-      url: "https://loftonrealty.com/sell"
+      url: "https://loftonrealty.com/sellers-guide"
     });
     window.scrollTo(0, 0);
   }, []);
-
-  // Form Validation & Handling
-  const validateForm = (data: ContactFormData): ContactFormErrors => {
-    const errs: ContactFormErrors = {};
-    if (!data.name.trim()) errs.name = 'Name is required';
-    if (!data.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errs.email = 'Valid email is required';
-    if (!data.phone.trim()) errs.phone = 'Phone is required';
-    return errs;
-  };
-
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (name !== 'botField' && errors[name as keyof ContactFormErrors]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Honeypot check
-    if (formData.botField) {
-      setIsSuccess(true);
-      return;
-    }
-
-    const validationErrors = validateForm(formData);
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
-
-    setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    setFormData({ name: '', phone: '', email: '', address: '', message: '', botField: '' });
-  };
 
   const steps: TimelineStep[] = [
     {
@@ -630,91 +566,16 @@ export const SellerGuide = () => {
               <p className="text-gray-400 text-lg">Schedule a no-obligation consultation with our team.</p>
             </div>
             
-            {isSuccess ? (
-              <div className="relative z-10 text-center py-10 bg-white/5 rounded-2xl border border-white/10">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500/20 text-green-400 rounded-full mb-4">
-                  <CheckCircle2 size={32} />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Request Received!</h3>
-                <p className="text-gray-300">We'll be in touch shortly to schedule your consultation.</p>
-                <button 
-                  onClick={() => setIsSuccess(false)}
-                  className="mt-6 text-brand font-bold hover:text-white transition-colors"
-                >
-                  Send another request
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleFormSubmit} className="relative z-10 space-y-4 max-w-2xl mx-auto">
-                {/* Honeypot Input */}
-                <input 
-                  type="text" 
-                  name="botField" 
-                  value={formData.botField} 
-                  onChange={handleFormChange} 
-                  className="absolute opacity-0 -z-10 h-0 w-0" 
-                  tabIndex={-1} 
-                  autoComplete="off" 
-                />
+            <div className="relative z-10 max-w-2xl mx-auto">
+               <SharedContactForm variant="dark" />
+            </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="relative">
-                    <input 
-                      type="text" name="name" placeholder="Name *" 
-                      value={formData.name} onChange={handleFormChange}
-                      className={`w-full bg-white/10 border ${errors.name ? 'border-red-400' : 'border-white/20'} rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand`} 
-                    />
-                  </div>
-                  <div className="relative">
-                    <input 
-                      type="tel" name="phone" placeholder="Phone *" 
-                      value={formData.phone} onChange={handleFormChange}
-                      className={`w-full bg-white/10 border ${errors.phone ? 'border-red-400' : 'border-white/20'} rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand`} 
-                    />
-                  </div>
-                </div>
-                <div className="relative">
-                  <input 
-                    type="email" name="email" placeholder="Email *" 
-                    value={formData.email} onChange={handleFormChange}
-                    className={`w-full bg-white/10 border ${errors.email ? 'border-red-400' : 'border-white/20'} rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand`} 
-                  />
-                </div>
-                <input 
-                  type="text" name="address" placeholder="Property Address" 
-                  value={formData.address} onChange={handleFormChange}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand" 
-                />
-                <textarea 
-                  name="message"
-                  rows={3} 
-                  placeholder="Tell us about your selling goals..." 
-                  value={formData.message} onChange={handleFormChange}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-5 py-4 text-white placeholder-gray-400 outline-none focus:border-brand focus:ring-1 focus:ring-brand resize-none" 
-                />
-                
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-brand text-white font-bold py-4 rounded-xl hover:bg-brand-dark transition-all shadow-lg hover:shadow-brand/20 flex justify-center items-center gap-2"
-                >
-                  {isSubmitting ? <Loader2 className="animate-spin" /> : 'Schedule Consultation'}
-                </button>
-
-                {(Object.keys(errors).length > 0) && (
-                   <p className="text-red-400 text-sm text-center flex items-center justify-center gap-1">
-                     <AlertCircle size={14} /> Please fill in all required fields correctly.
-                   </p>
-                )}
-
-                <div className="pt-6 text-center">
-                   <p className="text-gray-400 text-sm mb-2">Or call us directly</p>
-                   <a href="tel:7132037661" className="text-white font-bold text-xl hover:text-brand transition-colors">
-                     (713) 203-7661
-                   </a>
-                </div>
-              </form>
-            )}
+            <div className="relative z-10 pt-6 text-center">
+                <p className="text-gray-400 text-sm mb-2">Or call us directly</p>
+                <a href="tel:7132037661" className="text-white font-bold text-xl hover:text-brand transition-colors">
+                  (713) 203-7661
+                </a>
+            </div>
           </div>
         </div>
       </section>

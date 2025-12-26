@@ -12,7 +12,6 @@ interface PropertyCardProps {
 export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode = 'grid' }) => {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -47,7 +46,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
   };
 
   const handleCardClick = () => {
-    navigate(`/properties/${property.id}`);
+    navigate(`/property-listings/${property.id}`);
   };
 
   const isList = viewMode === 'list';
@@ -56,8 +55,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
     <div
       onClick={handleCardClick}
       className={`group bg-white rounded-[20px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 flex ${isList ? 'flex-col md:flex-row' : 'flex-col hover:-translate-y-2'}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       role="article"
       aria-label={`View details for ${property.address}`}
     >
@@ -110,19 +107,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
            </span>
          </div>
 
-         {/* Carousel Controls */}
+         {/* Carousel Controls - Always visible on mobile, Hover on Desktop */}
          {property.images.length > 1 && !imageError && (
            <>
              <button 
                onClick={handlePrevImage}
-               className={`absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full text-gray-800 shadow-md hover:bg-white hover:text-brand transition-all duration-200 z-20 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}
+               className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full text-gray-800 shadow-md hover:bg-white hover:text-brand transition-all duration-200 z-20 opacity-100 translate-x-0 lg:opacity-0 lg:-translate-x-4 lg:group-hover:opacity-100 lg:group-hover:translate-x-0"
                aria-label="Previous image"
              >
                <ChevronLeft size={18} />
              </button>
              <button 
                onClick={handleNextImage}
-               className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full text-gray-800 shadow-md hover:bg-white hover:text-brand transition-all duration-200 z-20 ${isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}
+               className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full text-gray-800 shadow-md hover:bg-white hover:text-brand transition-all duration-200 z-20 opacity-100 translate-x-0 lg:opacity-0 lg:translate-x-4 lg:group-hover:opacity-100 lg:group-hover:translate-x-0"
                aria-label="Next image"
              >
                <ChevronRight size={18} />
@@ -143,10 +140,12 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
          {/* Gradient Overlay */}
          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
-         {/* Favorite Button (Visible on Hover/Active) */}
+         {/* Favorite Button - Always visible on mobile or if active, Hover on Desktop */}
          <button 
             onClick={toggleFavorite}
-            className={`absolute top-4 right-4 z-20 bg-white/90 backdrop-blur p-2 rounded-full shadow-md hover:bg-white transition-all duration-200 ${isFavorite ? 'text-red-500' : 'text-gray-600 hover:text-red-500'} ${isHovered || isFavorite ? 'opacity-100' : 'opacity-0'}`}
+            className={`absolute top-4 right-4 z-20 bg-white/90 backdrop-blur p-2 rounded-full shadow-md hover:bg-white transition-all duration-200 
+              ${isFavorite ? 'text-red-500 opacity-100' : 'text-gray-600 hover:text-red-500'} 
+              ${!isFavorite ? 'opacity-100 lg:opacity-0 lg:group-hover:opacity-100' : ''}`}
             title={isFavorite ? "Remove from favorites" : "Save to favorites"}
          >
             <Heart size={18} className={isFavorite ? 'fill-current' : ''} />

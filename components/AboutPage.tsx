@@ -18,7 +18,7 @@ export const AboutPage = () => {
     updateSEO({
       title: "About Lofton Realty | Our Story & Team",
       description: "Learn about Lofton Realty, a relationship-driven brokerage founded by Jared Lofton. Serving Houston, Galveston, Austin, and beyond with integrity.",
-      url: "https://loftonrealty.com/about"
+      url: "https://loftonrealty.com/about-us"
     });
     window.scrollTo(0, 0);
   }, []);
@@ -255,7 +255,7 @@ export const AboutPage = () => {
                     In a crowded market, experience and integrity matter. Here is how we deliver superior results for our clients every single day.
                   </p>
                   <button 
-                    onClick={() => navigate('/contact')}
+                    onClick={() => navigate('/contact-us')}
                     className="bg-charcoal text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-black transition-colors"
                   >
                     Experience the Difference
@@ -356,13 +356,13 @@ export const AboutPage = () => {
            
            <div className="flex flex-col sm:flex-row justify-center gap-4">
              <Link 
-               to="/properties"
+               to="/property-listings"
                className="bg-charcoal text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-black transition-colors shadow-lg text-center"
              >
                Start Your Home Search
              </Link>
              <Link 
-               to="/contact"
+               to="/contact-us"
                className="bg-white text-charcoal px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-50 transition-colors shadow-lg border border-gray-200 flex items-center justify-center gap-2"
              >
                Get a Free Consultation <ArrowRight size={20} />
