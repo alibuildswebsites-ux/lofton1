@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Heart, MapPin, Bed, Bath, Maximize, ChevronLeft, ChevronRight, ImageOff } from 'lucide-react';
 import { Property } from '../types';
 import { getOptimizedImageUrl } from '../utils';
+import { saveProperty, unsaveProperty } from '../lib/firebase/firestore';
+import { useAuth } from '../hooks/useAuth';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase.config';
 
 interface PropertyCardProps {
   property: Property;
@@ -11,10 +15,32 @@ interface PropertyCardProps {
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode = 'grid' }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Check if property is saved on mount
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (user) {
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            const savedProps = userDoc.data().savedProperties || [];
+            setIsFavorite(savedProps.includes(property.id));
+          }
+        } catch (error) {
+          console.error("Error checking favorite status:", error);
+        }
+      } else {
+        setIsFavorite(false);
+      }
+    };
+    checkFavoriteStatus();
+  }, [user, property.id]);
 
   // Reset loading state when image index changes
   useEffect(() => {
@@ -39,10 +65,32 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
     setImageError(false);
   };
 
-  const toggleFavorite = (e: MouseEvent) => {
+  const toggleFavorite = async (e: MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    setIsFavorite(!isFavorite);
+    
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    // Optimistic UI update
+    const newStatus = !isFavorite;
+    setIsFavorite(newStatus);
+    
+    try {
+      if (isFavorite) {
+        // Was favorite, so unsave
+        await unsaveProperty(user.uid, property.id);
+      } else {
+        // Was not favorite, so save
+        await saveProperty(user.uid, property.id);
+      }
+    } catch (error) {
+      // Revert on error
+      setIsFavorite(!newStatus);
+      console.error("Error toggling favorite:", error);
+    }
   };
 
   const handleCardClick = () => {

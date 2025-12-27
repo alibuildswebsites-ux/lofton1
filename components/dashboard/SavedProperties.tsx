@@ -1,10 +1,37 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Search } from 'lucide-react';
+import { Heart, Search, Loader2 } from 'lucide-react';
+import { getSavedProperties } from '../../lib/firebase/firestore';
+import { PropertyCard } from '../PropertyCard';
+import { useAuth } from '../../hooks/useAuth';
+import { Property } from '../../types';
 
 export const SavedProperties = () => {
-  // Placeholder - will be populated in Phase 4
-  const savedProperties: any[] = [];
+  const { user } = useAuth();
+  const [savedProperties, setSavedProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadSaved = async () => {
+      if (user) {
+        setLoading(true);
+        const saved = await getSavedProperties(user.uid);
+        // Cast the result to Property[] assuming firestore returns matching shape or close enough
+        setSavedProperties(saved as Property[]);
+        setLoading(false);
+      }
+    };
+    loadSaved();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto flex flex-col items-center justify-center py-20">
+        <Loader2 className="w-10 h-10 text-brand animate-spin mb-4" />
+        <p className="text-gray-500">Loading saved properties...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -20,7 +47,7 @@ export const SavedProperties = () => {
             Start exploring our property listings and save your favorites to view them here.
           </p>
           <Link
-            to="/properties"
+            to="/property-listings"
             className="inline-flex items-center gap-2 bg-brand text-white px-6 py-3 rounded-lg font-semibold hover:bg-brand/90 transition-colors"
           >
             <Search size={20} />
@@ -29,7 +56,9 @@ export const SavedProperties = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Property cards will be rendered here in Phase 4 */}
+          {savedProperties.map((property) => (
+            <PropertyCard key={property.id} property={property} />
+          ))}
         </div>
       )}
     </div>

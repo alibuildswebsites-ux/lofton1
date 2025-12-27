@@ -41,12 +41,12 @@ function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<LoftonRealtyHome />} />
-          <Route path="/properties" element={<PropertyListings />} />
-          <Route path="/properties/:id" element={<PropertyDetailPage />} />
-          <Route path="/buy" element={<BuyerGuide />} />
-          <Route path="/sell" element={<SellerGuide />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/about" element={<AboutPage />} />
+          <Route path="/property-listings" element={<PropertyListings />} />
+          <Route path="/property-listings/:id" element={<PropertyDetailPage />} />
+          <Route path="/buyers-guide" element={<BuyerGuide />} />
+          <Route path="/sellers-guide" element={<SellerGuide />} />
+          <Route path="/contact-us" element={<ContactPage />} />
+          <Route path="/about-us" element={<AboutPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/login" element={<LoginPage />} />
