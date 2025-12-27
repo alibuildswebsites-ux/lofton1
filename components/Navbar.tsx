@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Menu, X, Grid, BookOpen, TrendingUp, Mail, Info, User as UserIcon, LogOut, LayoutDashboard } from 'lucide-react';
+import { Home, Menu, X, Grid, BookOpen, TrendingUp, Mail, Info, User as UserIcon, LogOut, LayoutDashboard, Heart } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { logOut } from '../lib/firebase/auth';
 
-export const Navbar = () => {
+interface NavbarProps {
+  variant?: 'public' | 'dashboard';
+}
+
+export const Navbar = ({ variant = 'public' }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -44,7 +48,7 @@ export const Navbar = () => {
   };
 
   // Nav Items
-  const navLinks = [
+  const publicLinks = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'About Us', path: '/about-us', icon: Info },
     { name: 'Property Listings', path: '/property-listings', icon: Grid },
@@ -52,6 +56,14 @@ export const Navbar = () => {
     { name: 'Seller’s Guide', path: '/sellers-guide', icon: TrendingUp },
     { name: 'Contact Us', path: '/contact-us', icon: Mail },
   ];
+
+  const dashboardLinks = [
+    { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Saved Properties', path: '/dashboard/saved', icon: Heart },
+    { name: 'Profile Settings', path: '/dashboard/profile', icon: UserIcon },
+  ];
+
+  const navLinks = variant === 'dashboard' ? dashboardLinks : publicLinks;
 
   // Mobile Drawer Variants
   const drawerVariants = {
@@ -103,7 +115,7 @@ export const Navbar = () => {
         <div className="max-w-7xl mx-auto px-5 md:px-6 lg:px-8 flex justify-between items-center h-full">
           {/* Logo (Left) */}
           <Link 
-            to="/" 
+            to={variant === 'dashboard' ? '/dashboard' : '/'} 
             className="font-extrabold text-2xl text-charcoal-dark tracking-tight z-[101] relative rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
             onClick={() => setIsMobileMenuOpen(false)}
           >
@@ -158,25 +170,29 @@ export const Navbar = () => {
                         <p className="text-sm text-gray-500 truncate">{user.email}</p>
                       </div>
                       
-                      <Link
-                        to="/dashboard"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
-                      >
-                        <LayoutDashboard size={18} className="text-gray-600" />
-                        <span className="text-gray-700 font-medium">Dashboard</span>
-                      </Link>
+                      {variant !== 'dashboard' && (
+                        <>
+                          <Link
+                            to="/dashboard"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                          >
+                            <LayoutDashboard size={18} className="text-gray-600" />
+                            <span className="text-gray-700 font-medium">Dashboard</span>
+                          </Link>
+                          
+                          <Link
+                            to="/dashboard/profile"
+                            onClick={() => setIsUserMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                          >
+                            <UserIcon size={18} className="text-gray-600" />
+                            <span className="text-gray-700 font-medium">Profile Settings</span>
+                          </Link>
+                        </>
+                      )}
                       
-                      <Link
-                        to="/dashboard/profile"
-                        onClick={() => setIsUserMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
-                      >
-                        <UserIcon size={18} className="text-gray-600" />
-                        <span className="text-gray-700 font-medium">Profile Settings</span>
-                      </Link>
-                      
-                      <div className="border-t border-gray-100 mt-2 pt-2">
+                      <div className={variant !== 'dashboard' ? "border-t border-gray-100 mt-2 pt-2" : ""}>
                         <button
                           onClick={handleLogout}
                           className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors text-red-600"
@@ -207,12 +223,14 @@ export const Navbar = () => {
               </>
             )}
             
-            <Link 
-              to="/contact-us"
-              className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95 inline-block"
-            >
-              Book Consultation
-            </Link>
+            {variant !== 'dashboard' && (
+              <Link 
+                to="/contact-us"
+                className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95 inline-block"
+              >
+                Book Consultation
+              </Link>
+            )}
           </div>
 
           {/* Mobile Toggle */}
@@ -303,23 +321,27 @@ export const Navbar = () => {
                         <p className="text-sm text-gray-500 truncate">{user.email}</p>
                       </div>
                       
-                      <Link 
-                        to="/dashboard"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-lg font-medium h-[56px] flex items-center gap-4 px-4 rounded-lg text-gray-700 hover:bg-gray-50"
-                      >
-                        <LayoutDashboard size={24} />
-                        Dashboard
-                      </Link>
-                      
-                      <Link 
-                        to="/dashboard/profile"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-lg font-medium h-[56px] flex items-center gap-4 px-4 rounded-lg text-gray-700 hover:bg-gray-50"
-                      >
-                        <UserIcon size={24} />
-                        Profile Settings
-                      </Link>
+                      {variant !== 'dashboard' && (
+                        <>
+                          <Link 
+                            to="/dashboard"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="text-lg font-medium h-[56px] flex items-center gap-4 px-4 rounded-lg text-gray-700 hover:bg-gray-50"
+                          >
+                            <LayoutDashboard size={24} />
+                            Dashboard
+                          </Link>
+                          
+                          <Link 
+                            to="/dashboard/profile"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="text-lg font-medium h-[56px] flex items-center gap-4 px-4 rounded-lg text-gray-700 hover:bg-gray-50"
+                          >
+                            <UserIcon size={24} />
+                            Profile Settings
+                          </Link>
+                        </>
+                      )}
                       
                       <button
                         onClick={handleLogout}
@@ -349,13 +371,15 @@ export const Navbar = () => {
                   )}
                 </div>
 
-                <Link 
-                  to="/contact-us"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform w-full mt-auto text-center"
-                >
-                  Book Consultation
-                </Link>
+                {variant !== 'dashboard' && (
+                  <Link 
+                    to="/contact-us"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform w-full mt-auto text-center"
+                  >
+                    Book Consultation
+                  </Link>
+                )}
               </div>
             </motion.div>
           </>
