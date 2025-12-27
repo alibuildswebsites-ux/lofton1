@@ -65,8 +65,9 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
 
   // Combine links for dashboard variant
   // We place Dashboard links first for quick access, then the public site links
+  // Excluding Buyer's and Seller's guides for dashboard as requested
   const navLinks = variant === 'dashboard' 
-    ? [...dashboardSpecificLinks, ...publicLinks] 
+    ? [...dashboardSpecificLinks, ...publicLinks.filter(link => link.path !== '/buyers-guide' && link.path !== '/sellers-guide')] 
     : publicLinks;
 
   // Mobile Drawer Variants
