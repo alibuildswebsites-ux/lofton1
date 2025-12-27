@@ -18,6 +18,8 @@ const NotFound = lazy(() => import('./components/NotFound').then(module => ({ de
 const LoginPage = lazy(() => import('./components/auth/LoginPage'));
 const SignupPage = lazy(() => import('./components/auth/SignupPage'));
 const ForgotPasswordPage = lazy(() => import('./components/auth/ForgotPasswordPage'));
+const Dashboard = lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
+const ProtectedRoute = lazy(() => import('./components/auth/ProtectedRoute').then(module => ({ default: module.ProtectedRoute })));
 
 // Global Loading Spinner for Route Transitions
 const PageLoader = () => (
@@ -45,6 +47,14 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

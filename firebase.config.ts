@@ -3,19 +3,17 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCnATA8Aoz9a9jA2GNPWpcfcagt0cl",
-  authDomain: "lofton-realty.firebaseapp.com",
-  projectId: "lofton-realty",
-  storageBucket: "lofton-realty.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "G-YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyCnATA8Aoz9a9jA2GNPWpcfcagt0clzu3Q",
+  authDomain: "lofton-9c7f1.firebaseapp.com",
+  projectId: "lofton-9c7f1",
+  storageBucket: "lofton-9c7f1.firebasestorage.app",
+  messagingSenderId: "886711502160",
+  appId: "1:886711502160:web:b94884445d5da2bf745855",
+  measurementId: "G-1WWEW8LKR1"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
