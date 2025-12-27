@@ -47,23 +47,27 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
     navigate('/');
   };
 
-  // Nav Items
+  // Nav Items Definitions
   const publicLinks = [
     { name: 'Home', path: '/', icon: Home },
-    { name: 'About Us', path: '/about-us', icon: Info },
-    { name: 'Property Listings', path: '/property-listings', icon: Grid },
-    { name: 'Buyer’s Guide', path: '/buyers-guide', icon: BookOpen },
-    { name: 'Seller’s Guide', path: '/sellers-guide', icon: TrendingUp },
-    { name: 'Contact Us', path: '/contact-us', icon: Mail },
+    { name: 'About', path: '/about-us', icon: Info },
+    { name: 'Listings', path: '/property-listings', icon: Grid },
+    { name: 'Buy', path: '/buyers-guide', icon: BookOpen },
+    { name: 'Sell', path: '/sellers-guide', icon: TrendingUp },
+    { name: 'Contact', path: '/contact-us', icon: Mail },
   ];
 
-  const dashboardLinks = [
+  const dashboardSpecificLinks = [
     { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Saved Properties', path: '/dashboard/saved', icon: Heart },
-    { name: 'Profile Settings', path: '/dashboard/profile', icon: UserIcon },
+    { name: 'Saved', path: '/dashboard/saved', icon: Heart },
+    { name: 'Settings', path: '/dashboard/profile', icon: UserIcon },
   ];
 
-  const navLinks = variant === 'dashboard' ? dashboardLinks : publicLinks;
+  // Combine links for dashboard variant
+  // We place Dashboard links first for quick access, then the public site links
+  const navLinks = variant === 'dashboard' 
+    ? [...dashboardSpecificLinks, ...publicLinks] 
+    : publicLinks;
 
   // Mobile Drawer Variants
   const drawerVariants = {
@@ -112,23 +116,25 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
             : 'bg-white shadow-md py-5 border-gray-100'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-5 md:px-6 lg:px-8 flex justify-between items-center h-full">
+        {/* Adjusted padding and max-width for cleaner fit on large screens with many links */}
+        <div className="max-w-[1440px] mx-auto px-5 md:px-6 lg:px-8 flex justify-between items-center h-full">
           {/* Logo (Left) */}
           <Link 
             to={variant === 'dashboard' ? '/dashboard' : '/'} 
-            className="font-extrabold text-2xl text-charcoal-dark tracking-tight z-[101] relative rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+            className="font-extrabold text-2xl text-charcoal-dark tracking-tight z-[101] relative rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 flex-shrink-0 mr-4"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Lofton Realty
           </Link>
 
-          {/* Desktop Menu (Center/Right) */}
-          <div className="hidden lg:flex items-center gap-6 xl:gap-8">
+          {/* Desktop Menu (Center) */}
+          {/* Using gap-3 on LG and gap-6 on XL to accommodate the large number of links */}
+          <div className="hidden lg:flex items-center gap-2 xl:gap-5 flex-wrap justify-center">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
                 to={link.path}
-                className={`text-sm font-medium transition-colors relative group py-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 ${
+                className={`text-sm font-medium transition-colors relative group py-1 px-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 whitespace-nowrap ${
                   isActive(link.path) ? 'text-brand' : 'text-gray-600 hover:text-brand'
                 }`}
               >
@@ -142,19 +148,19 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
             ))}
           </div>
 
-          {/* Desktop CTA (Right) */}
-          <div className="hidden lg:flex items-center gap-3 pl-4">
+          {/* Desktop CTA & User (Right) */}
+          <div className="hidden lg:flex items-center gap-3 pl-4 flex-shrink-0">
             {user ? (
               // Logged In User Dropdown
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-3 px-4 py-2 rounded-full bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                   <div className="w-8 h-8 bg-gradient-to-br from-brand to-brand-gradient rounded-full flex items-center justify-center text-white font-semibold text-sm">
                     {user.displayName?.[0]?.toUpperCase() || 'U'}
                   </div>
-                  <span className="font-semibold text-gray-900">{user.displayName || 'User'}</span>
+                  <span className="font-semibold text-gray-900 max-w-[100px] truncate">{user.displayName || 'User'}</span>
                 </button>
 
                 {/* Dropdown Menu */}
@@ -178,16 +184,7 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
                             className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
                           >
                             <LayoutDashboard size={18} className="text-gray-600" />
-                            <span className="text-gray-700 font-medium">Dashboard</span>
-                          </Link>
-                          
-                          <Link
-                            to="/dashboard/profile"
-                            onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
-                          >
-                            <UserIcon size={18} className="text-gray-600" />
-                            <span className="text-gray-700 font-medium">Profile Settings</span>
+                            <span className="text-gray-700 font-medium">Dashboard Overview</span>
                           </Link>
                         </>
                       )}
@@ -210,27 +207,25 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
               <>
                 <Link 
                   to="/login"
-                  className="text-sm font-semibold text-gray-700 hover:text-brand transition-colors px-4 py-2 rounded-md"
+                  className="text-sm font-semibold text-gray-700 hover:text-brand transition-colors px-3 py-2 rounded-md whitespace-nowrap"
                 >
                   Sign In
                 </Link>
                 <Link 
                   to="/signup"
-                  className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95"
+                  className="bg-gradient-to-r from-brand to-brand-gradient text-white px-5 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95 whitespace-nowrap text-sm"
                 >
                   Sign Up
                 </Link>
               </>
             )}
             
-            {variant !== 'dashboard' && (
-              <Link 
-                to="/contact-us"
-                className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95 inline-block"
-              >
-                Book Consultation
-              </Link>
-            )}
+            <Link 
+              to="/contact-us"
+              className="bg-gradient-to-r from-charcoal to-black text-white px-5 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95 inline-block whitespace-nowrap text-sm"
+            >
+              Book Consultation
+            </Link>
           </div>
 
           {/* Mobile Toggle */}
@@ -293,7 +288,7 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
               animate="open"
               exit="closed"
               variants={drawerVariants}
-              className="fixed top-0 right-0 h-full w-[80%] max-w-[320px] bg-white z-[102] shadow-2xl lg:hidden flex flex-col pt-24 px-6 pb-8 overflow-y-auto"
+              className="fixed top-0 right-0 h-full w-[85%] max-w-[340px] bg-white z-[102] shadow-2xl lg:hidden flex flex-col pt-24 px-6 pb-8 overflow-y-auto"
             >
               <div className="flex flex-col gap-2 flex-grow">
                 {navLinks.map((link) => (
@@ -331,15 +326,6 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
                             <LayoutDashboard size={24} />
                             Dashboard
                           </Link>
-                          
-                          <Link 
-                            to="/dashboard/profile"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="text-lg font-medium h-[56px] flex items-center gap-4 px-4 rounded-lg text-gray-700 hover:bg-gray-50"
-                          >
-                            <UserIcon size={24} />
-                            Profile Settings
-                          </Link>
                         </>
                       )}
                       
@@ -371,15 +357,13 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
                   )}
                 </div>
 
-                {variant !== 'dashboard' && (
-                  <Link 
-                    to="/contact-us"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform w-full mt-auto text-center"
-                  >
-                    Book Consultation
-                  </Link>
-                )}
+                <Link 
+                  to="/contact-us"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="bg-gradient-to-r from-charcoal to-black text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform w-full mt-auto text-center"
+                >
+                  Book Consultation
+                </Link>
               </div>
             </motion.div>
           </>
