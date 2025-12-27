@@ -66,7 +66,7 @@ export const SignupPage = () => {
       
       <main className="flex-grow flex pt-16">
         {/* Left Side - Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-24 relative bg-white">
+        <div className="w-full lg:w-1/2 flex items-center justify-center px-6 py-12 sm:px-12 sm:py-16 lg:p-24 relative bg-white">
             <motion.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}

@@ -35,7 +35,7 @@ export const ForgotPasswordPage = () => {
       <Navbar />
       
       {/* Centered Content */}
-      <main className="flex-grow flex items-center justify-center p-6 mt-16">
+      <main className="flex-grow flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8 mt-16">
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
