@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Menu, X, Grid, BookOpen, TrendingUp, Mail, Info } from 'lucide-react';
+import { Home, Menu, X, Grid, BookOpen, TrendingUp, Mail, Info, User as UserIcon, LogOut, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { logOut } from '../lib/firebase/auth';
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const currentPath = location.pathname;
 
   // Lock body scroll when mobile menu is open
@@ -30,6 +34,12 @@ export const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLogout = async () => {
+    await logOut();
+    setIsMobileMenuOpen(false);
+    navigate('/');
+  };
 
   // Nav Items
   const navLinks = [
@@ -118,14 +128,50 @@ export const Navbar = () => {
             ))}
           </div>
 
-          {/* Desktop CTA (Right) */}
-          <div className="hidden lg:block pl-4">
-            <Link 
-              to="/contact-us"
-              className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 inline-block"
-            >
-              Book Consultation
-            </Link>
+          {/* Desktop - Auth Buttons / User Menu */}
+          <div className="hidden lg:flex items-center gap-3 pl-4">
+            {user ? (
+              <div className="relative group">
+                <button className="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-gray-50 transition-colors">
+                  <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-white font-semibold">
+                    {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <span className="font-medium text-gray-700">{user.displayName || 'User'}</span>
+                </button>
+                
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2">
+                  <Link 
+                    to="/dashboard" 
+                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-gray-700"
+                  >
+                    <LayoutDashboard size={18} />
+                    Dashboard
+                  </Link>
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 text-red-600"
+                  >
+                    <LogOut size={18} />
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Link 
+                  to="/login"
+                  className="text-sm font-semibold text-gray-700 hover:text-brand transition-colors px-4 py-2 rounded-md"
+                >
+                  Sign In
+                </Link>
+                <Link 
+                  to="/signup"
+                  className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Toggle */}
@@ -206,6 +252,47 @@ export const Navbar = () => {
                     </motion.div>
                   </Link>
                 ))}
+
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  {user ? (
+                    <>
+                      <Link 
+                        to="/dashboard"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-lg font-medium h-[56px] flex items-center gap-4 px-4 rounded-lg text-gray-700 hover:bg-gray-50"
+                      >
+                        <LayoutDashboard size={20} className="text-gray-400" />
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-lg font-medium h-[56px] flex items-center gap-4 px-4 rounded-lg text-red-600 hover:bg-red-50"
+                      >
+                        <LogOut size={20} />
+                        Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link 
+                        to="/login"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-lg font-medium h-[56px] flex items-center gap-4 px-4 rounded-lg text-gray-700 hover:bg-gray-50"
+                      >
+                        <UserIcon size={20} className="text-gray-400" />
+                        Sign In
+                      </Link>
+                      <Link 
+                        to="/signup"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-lg font-medium h-[56px] flex items-center gap-4 px-4 rounded-lg text-gray-700 hover:bg-gray-50"
+                      >
+                        <UserIcon size={20} className="text-gray-400" />
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
+                </div>
               </div>
               
               <Link 

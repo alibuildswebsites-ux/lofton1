@@ -15,6 +15,9 @@ const AboutPage = lazy(() => import('./components/AboutPage').then(module => ({ 
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
 const TermsOfService = lazy(() => import('./components/TermsOfService').then(module => ({ default: module.TermsOfService })));
 const NotFound = lazy(() => import('./components/NotFound').then(module => ({ default: module.NotFound })));
+const LoginPage = lazy(() => import('./components/auth/LoginPage'));
+const SignupPage = lazy(() => import('./components/auth/SignupPage'));
+const ForgotPasswordPage = lazy(() => import('./components/auth/ForgotPasswordPage'));
 
 // Global Loading Spinner for Route Transitions
 const PageLoader = () => (
@@ -39,6 +42,9 @@ function App() {
           <Route path="/about-us" element={<AboutPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
