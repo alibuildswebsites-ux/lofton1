@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { Heart, User, Calendar, ArrowRight, Search, Mail } from 'lucide-react';
+import { Heart, User, ArrowRight, Search, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const DashboardHome = () => {
@@ -21,33 +21,6 @@ export const DashboardHome = () => {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 }
   };
-
-  const stats = [
-    {
-      icon: Heart,
-      label: 'Saved Homes',
-      value: 'View List',
-      bg: 'bg-rose-50',
-      text: 'text-rose-600',
-      link: '/dashboard/saved'
-    },
-    {
-      icon: User,
-      label: 'Profile Status',
-      value: 'Active',
-      bg: 'bg-blue-50',
-      text: 'text-blue-600',
-      link: '/dashboard/profile'
-    },
-    {
-      icon: Calendar,
-      label: 'Member Since',
-      value: user?.metadata?.creationTime ? new Date(user.metadata.creationTime).getFullYear() : new Date().getFullYear(),
-      bg: 'bg-brand-light',
-      text: 'text-brand-dark',
-      link: '/dashboard/profile'
-    }
-  ];
 
   const quickActions = [
     {
@@ -105,30 +78,6 @@ export const DashboardHome = () => {
         </Link>
       </motion.div>
 
-      {/* Stats Grid */}
-      <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.map((stat, index) => (
-          <Link
-            key={index}
-            to={stat.link}
-            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-brand/30 transition-all duration-300 group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg} ${stat.text} transition-transform group-hover:scale-110`}>
-                <stat.icon size={24} />
-              </div>
-              <div className="bg-gray-50 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                 <ArrowRight size={14} className="text-gray-400" />
-              </div>
-            </div>
-            <div>
-              <p className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-1">{stat.label}</p>
-              <p className="text-2xl font-extrabold text-charcoal">{stat.value}</p>
-            </div>
-          </Link>
-        ))}
-      </motion.div>
-
       {/* Quick Actions */}
       <motion.div variants={item}>
         <h2 className="text-xl font-bold text-charcoal mb-4">Quick Actions</h2>
@@ -162,10 +111,6 @@ export const DashboardHome = () => {
              <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">Email Address</label>
                 <p className="font-medium text-charcoal">{user?.email}</p>
-             </div>
-             <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">User ID</label>
-                <p className="font-medium text-gray-400 font-mono text-xs">{user?.uid}</p>
              </div>
              <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wide">Last Sign In</label>
