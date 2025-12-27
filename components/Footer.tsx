@@ -14,7 +14,7 @@ export const Footer = () => {
       <div className="max-w-[1280px] mx-auto px-5 md:px-10 lg:px-[40px]">
         
         {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 text-center md:text-left">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16 text-center md:text-left">
           
           {/* Left: Company Name/Logo */}
           <div className="flex flex-col items-center md:items-start">
@@ -27,10 +27,26 @@ export const Footer = () => {
             </p>
           </div>
 
+          {/* New: Account Section */}
+          <div className="flex flex-col items-center md:items-start">
+            <h4 className="text-lg font-bold mb-6 text-brand">Account</h4>
+            <div className="space-y-4 flex flex-col items-center md:items-start">
+              <Link to="/login" className="text-gray-400 hover:text-white transition-colors text-sm rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal-dark">
+                Sign In
+              </Link>
+              <Link to="/signup" className="text-gray-400 hover:text-white transition-colors text-sm rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal-dark">
+                Sign Up
+              </Link>
+              <Link to="/property-listings" className="text-gray-400 hover:text-white transition-colors text-sm rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal-dark">
+                View Properties
+              </Link>
+            </div>
+          </div>
+
           {/* Middle: Contact Info */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center md:items-start">
             <h4 className="text-lg font-bold mb-6 text-brand">Contact Us</h4>
-            <div className="space-y-4 flex flex-col items-center">
+            <div className="space-y-4 flex flex-col items-center md:items-start">
               <div className="flex items-center gap-3 text-gray-400">
                 <Phone size={18} className="text-brand" />
                 <span>(713) 203-7661</span>
@@ -47,7 +63,7 @@ export const Footer = () => {
           </div>
 
           {/* Right: Social Media */}
-          <div className="flex flex-col items-center md:items-end">
+          <div className="flex flex-col items-center md:items-start">
              <h4 className="text-lg font-bold mb-6 text-brand">Follow Us</h4>
              <div className="flex gap-4">
                {socialLinks.map(({ icon: Icon, url }, i) => (
