@@ -19,7 +19,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Check if property is saved on mount
   useEffect(() => {
@@ -41,11 +40,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
     };
     checkFavoriteStatus();
   }, [user, property.id]);
-
-  // Reset loading state when image index changes
-  useEffect(() => {
-    setImageLoaded(false);
-  }, [currentImageIndex]);
 
   const handlePrevImage = (e: MouseEvent) => {
     e.stopPropagation();
@@ -109,11 +103,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
       {/* Image Carousel Area */}
       <div className={`relative overflow-hidden bg-gray-100 ${isList ? 'w-full md:w-[320px] h-[240px] md:h-auto shrink-0' : 'h-[240px] lg:h-[260px] w-full'}`}>
          
-         {/* Skeleton Loader */}
-         {!imageLoaded && !imageError && (
-           <div className="absolute inset-0 bg-gray-200 animate-pulse z-10" />
-         )}
-
          {/* Images */}
          {!imageError ? (
            property.images.map((img, idx) => (
@@ -126,11 +115,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
                  <img
                    src={getOptimizedImageUrl(img, 800)}
                    alt={`Property at ${property.address} - View ${idx + 1}`}
-                   className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${imageLoaded ? 'blur-0' : 'blur-sm'}`}
+                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                    loading="eager"
                    width="400"
                    height="300"
-                   onLoad={() => idx === currentImageIndex && setImageLoaded(true)}
                    onError={() => setImageError(true)}
                  />
                )}
