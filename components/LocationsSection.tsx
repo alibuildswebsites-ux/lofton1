@@ -102,7 +102,7 @@ export const LocationsSection = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-3xl shadow-2xl z-[101] overflow-hidden max-h-[90vh] flex flex-col"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] md:w-full max-w-2xl bg-white rounded-2xl md:rounded-3xl shadow-2xl z-[101] overflow-hidden max-h-[85vh] flex flex-col"
             >
               <div className="relative h-48 md:h-64 flex-shrink-0 bg-gray-100">
                 <img 
@@ -120,7 +120,7 @@ export const LocationsSection = () => {
                   <X size={20} />
                 </button>
                 <div className="absolute bottom-6 left-6 md:left-8 text-white">
-                  <h3 id="modal-title" className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
+                  <h3 id="modal-title" className="text-2xl md:text-4xl font-extrabold tracking-tight mb-2">
                     {selectedLocation.name}
                   </h3>
                   <div className="flex items-center gap-2 text-white/90 font-medium text-sm md:text-base">
@@ -130,7 +130,7 @@ export const LocationsSection = () => {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 overflow-y-auto">
+              <div className="p-6 md:p-8 overflow-y-auto flex-1">
                 <p className="text-gray-600 text-lg leading-relaxed mb-8">
                   {selectedLocation.longDescription}
                 </p>
