@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { updateUserName, updateUserPassword } from '../../lib/firebase/auth';
-import { User, Lock, Mail, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { User, Lock, Mail, CheckCircle, AlertCircle, Loader2, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const ProfileSettings = () => {
   const { user } = useAuth();
   const [name, setName] = useState(user?.displayName || '');
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [nameLoading, setNameLoading] = useState(false);
@@ -66,7 +66,6 @@ export const ProfileSettings = () => {
     
     if (result.success) {
       setPasswordSuccess('Password updated successfully!');
-      setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       setTimeout(() => setPasswordSuccess(''), 3000);
@@ -77,151 +76,161 @@ export const ProfileSettings = () => {
     setPasswordLoading(false);
   };
 
-  return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Profile Settings</h1>
-
-      {/* Profile Overview */}
-      <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="w-20 h-20 bg-gradient-to-br from-brand to-brand-gradient rounded-full flex items-center justify-center text-white text-3xl font-bold">
-            {user?.displayName?.[0]?.toUpperCase() || 'U'}
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">{user?.displayName || 'User'}</h2>
-            <p className="text-gray-500">{user?.email}</p>
-          </div>
-        </div>
+  const InputField = ({ icon: Icon, label, type, value, onChange, disabled = false, placeholder, required = false }: any) => (
+    <div className="space-y-2">
+      <label className="text-sm font-bold text-charcoal ml-1">{label}</label>
+      <div className="relative group">
+        <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${disabled ? 'text-gray-300' : 'text-gray-400 group-focus-within:text-brand'}`} size={20} />
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          required={required}
+          placeholder={placeholder}
+          className={`w-full pl-11 pr-4 py-3.5 rounded-xl border transition-all duration-200 font-medium ${
+            disabled 
+              ? 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed' 
+              : 'bg-white border-gray-200 focus:bg-white focus:ring-2 focus:ring-brand focus:border-transparent text-charcoal'
+          }`}
+        />
       </div>
-
-      {/* Update Name */}
-      <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h2>
-        
-        {nameSuccess && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 flex items-center gap-2">
-            <CheckCircle size={20} />
-            <span>{nameSuccess}</span>
-          </div>
-        )}
-
-        {nameError && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 flex items-center gap-2">
-            <AlertCircle size={20} />
-            <span>{nameError}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleNameUpdate} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Email (Cannot be changed)</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="email"
-                value={user?.email || ''}
-                disabled
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
-                placeholder="John Doe"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={nameLoading}
-            className="bg-charcoal text-white px-6 py-3 rounded-lg font-semibold hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {nameLoading && <Loader2 className="animate-spin" size={20} />}
-            {nameLoading ? 'Updating...' : 'Update Name'}
-          </button>
-        </form>
-      </div>
-
-      {/* Change Password */}
-      {!user?.providerData.some(p => p.providerId === 'google.com') && (
-        <div className="bg-white rounded-xl p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Change Password</h2>
-          
-          {passwordSuccess && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 flex items-center gap-2">
-              <CheckCircle size={20} />
-              <span>{passwordSuccess}</span>
-            </div>
-          )}
-
-          {passwordError && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-4 flex items-center gap-2">
-              <AlertCircle size={20} />
-              <span>{passwordError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handlePasswordUpdate} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">New Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Confirm New Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={passwordLoading}
-              className="bg-charcoal text-white px-6 py-3 rounded-lg font-semibold hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {passwordLoading && <Loader2 className="animate-spin" size={20} />}
-              {passwordLoading ? 'Updating...' : 'Change Password'}
-            </button>
-          </form>
-        </div>
-      )}
-
-      {user?.providerData.some(p => p.providerId === 'google.com') && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
-          <p className="text-sm">
-            You signed in with Google. Password changes must be done through your Google account.
-          </p>
-        </div>
-      )}
     </div>
+  );
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-3xl"
+    >
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold text-charcoal tracking-tight mb-2">Profile Settings</h1>
+        <p className="text-gray-500">Manage your personal information and security preferences.</p>
+      </div>
+
+      <div className="space-y-8">
+        {/* Personal Info Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 md:p-8">
+            <h2 className="text-xl font-bold text-charcoal mb-6 flex items-center gap-2">
+              <User className="text-brand" size={24} /> Personal Information
+            </h2>
+            
+            {nameSuccess && (
+              <div className="bg-green-50 border border-green-100 text-green-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 text-sm font-medium">
+                <CheckCircle size={18} /> {nameSuccess}
+              </div>
+            )}
+            {nameError && (
+              <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 text-sm font-medium">
+                <AlertCircle size={18} /> {nameError}
+              </div>
+            )}
+
+            <form onSubmit={handleNameUpdate} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <InputField 
+                    icon={Mail} 
+                    label="Email Address" 
+                    type="email" 
+                    value={user?.email || ''} 
+                    disabled={true} 
+                />
+                <InputField 
+                    icon={User} 
+                    label="Full Name" 
+                    type="text" 
+                    value={name} 
+                    onChange={(e: any) => setName(e.target.value)}
+                    required={true}
+                    placeholder="John Doe"
+                />
+              </div>
+
+              <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={nameLoading}
+                    className="bg-charcoal text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-charcoal/20"
+                  >
+                    {nameLoading && <Loader2 className="animate-spin" size={18} />}
+                    {nameLoading ? 'Saving...' : 'Save Changes'}
+                  </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Security Card */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 md:p-8">
+            <h2 className="text-xl font-bold text-charcoal mb-6 flex items-center gap-2">
+              <Shield className="text-brand" size={24} /> Security
+            </h2>
+
+            {user?.providerData.some(p => p.providerId === 'google.com') ? (
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 flex gap-4">
+                 <div className="bg-blue-100 p-2 rounded-full h-fit text-blue-600"><Lock size={20}/></div>
+                 <div>
+                    <h3 className="font-bold text-blue-900 mb-1">Google Account Linked</h3>
+                    <p className="text-sm text-blue-700 leading-relaxed">
+                        You signed in with Google. To change your password or security settings, please visit your Google Account settings.
+                    </p>
+                 </div>
+              </div>
+            ) : (
+              <>
+                {passwordSuccess && (
+                  <div className="bg-green-50 border border-green-100 text-green-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 text-sm font-medium">
+                    <CheckCircle size={18} /> {passwordSuccess}
+                  </div>
+                )}
+                {passwordError && (
+                  <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 text-sm font-medium">
+                    <AlertCircle size={18} /> {passwordError}
+                  </div>
+                )}
+
+                <form onSubmit={handlePasswordUpdate} className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <InputField 
+                        icon={Lock} 
+                        label="New Password" 
+                        type="password" 
+                        value={newPassword} 
+                        onChange={(e: any) => setNewPassword(e.target.value)}
+                        required={true}
+                        placeholder="••••••••"
+                    />
+                    <InputField 
+                        icon={Lock} 
+                        label="Confirm Password" 
+                        type="password" 
+                        value={confirmPassword} 
+                        onChange={(e: any) => setConfirmPassword(e.target.value)}
+                        required={true}
+                        placeholder="••••••••"
+                    />
+                  </div>
+
+                  <div className="flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={passwordLoading}
+                        className="bg-white border-2 border-charcoal text-charcoal px-8 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      >
+                        {passwordLoading && <Loader2 className="animate-spin" size={18} />}
+                        {passwordLoading ? 'Updating...' : 'Update Password'}
+                      </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 
