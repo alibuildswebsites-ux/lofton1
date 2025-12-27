@@ -103,9 +103,12 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
   };
 
   const isActive = (path: string) => {
-    if (path === '/' && currentPath === '/') return true;
-    if (path !== '/' && currentPath.startsWith(path)) return true;
-    return false;
+    // Exact match for root or dashboard overview to prevent partial matching
+    if (path === '/' || path === '/dashboard') {
+      return currentPath === path;
+    }
+    // For other paths, allow sub-routes (e.g. /property-listings/123 matches /property-listings)
+    return currentPath === path || currentPath.startsWith(`${path}/`);
   };
 
   return (
@@ -223,7 +226,7 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
             
             <Link 
               to="/contact-us"
-              className="bg-gradient-to-r from-charcoal to-black text-white px-5 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95 inline-block whitespace-nowrap text-sm"
+              className="bg-gradient-to-r from-charcoal to-black text-white px-5 py-2.5 rounded-full font-bold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95 inline-block whitespace-nowrap text-sm"
             >
               Book Consultation
             </Link>
