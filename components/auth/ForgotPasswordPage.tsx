@@ -4,6 +4,7 @@ import { resetPassword } from '../../lib/firebase/auth';
 import { Mail, Loader2, AlertCircle, CheckCircle2, ArrowLeft, KeyRound } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Navbar } from '../Navbar';
+import { Footer } from '../Footer';
 
 export const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
@@ -33,7 +34,7 @@ export const ForgotPasswordPage = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <Navbar />
       
-      {/* Centered Content - No Footer for distraction-free experience */}
+      {/* Centered Content */}
       <main className="flex-grow flex items-center justify-center p-6 mt-16">
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -116,6 +117,7 @@ export const ForgotPasswordPage = () => {
           </div>
         </motion.div>
       </main>
+      <Footer />
     </div>
   );
 };

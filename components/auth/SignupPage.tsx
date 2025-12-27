@@ -4,6 +4,7 @@ import { signUpWithEmail, signInWithGoogle } from '../../lib/firebase/auth';
 import { User, Mail, Lock, Loader2, AlertCircle, ArrowRight, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Navbar } from '../Navbar';
+import { Footer } from '../Footer';
 import { getOptimizedImageUrl } from '../../utils';
 
 export const SignupPage = () => {
@@ -236,6 +237,7 @@ export const SignupPage = () => {
             </motion.div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
