@@ -7,7 +7,6 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { LocationsSection } from './LocationsSection';
 import { TESTIMONIALS } from '../data';
 import { Testimonial } from '../types';
 import { getOptimizedImageUrl, updateSEO } from '../utils';
@@ -427,9 +426,6 @@ export const BuyerGuide = () => {
           </div>
         </div>
       </section>
-
-      {/* Market Insights Reuse */}
-      <LocationsSection />
 
       {/* Buyer Testimonials */}
       <section className="py-20 bg-white">

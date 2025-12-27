@@ -8,7 +8,6 @@ import {
 import { useNavigate, Link } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { MapIllustration } from './Illustrations';
 import { STATS } from '../data';
 import { getOptimizedImageUrl, updateSEO } from '../utils';
 import { SharedContactForm } from './SharedContactForm';
@@ -209,9 +208,9 @@ export const ContactPage = () => {
             <p className="text-gray-500">Visit our headquarters or connect with us in any of our 6 major markets.</p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="max-w-5xl mx-auto">
              {/* Map Embed */}
-             <div className="rounded-3xl overflow-hidden shadow-lg border border-gray-200 h-[400px] relative bg-gray-100">
+             <div className="rounded-3xl overflow-hidden shadow-lg border border-gray-200 h-[450px] relative bg-gray-100 w-full">
                 <iframe 
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d443088.0518320649!2d-95.68266224375!3d29.817478200000005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8640b8b4488d8501%3A0xca0d02def365053b!2sHouston%2C%20TX!5e0!3m2!1sen!2sus!4v1652822453673!5m2!1sen!2sus" 
                   width="100%" 
@@ -222,11 +221,6 @@ export const ContactPage = () => {
                   referrerPolicy="no-referrer-when-downgrade"
                   title="Lofton Realty Office Location"
                 ></iframe>
-             </div>
-             
-             {/* Service Area Illustration */}
-             <div className="w-full max-w-lg mx-auto">
-                <MapIllustration />
              </div>
           </div>
         </div>
