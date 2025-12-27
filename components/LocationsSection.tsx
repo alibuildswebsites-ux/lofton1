@@ -82,14 +82,16 @@ export const LocationsSection = () => {
       {/* Location Detail Modal */}
       <AnimatePresence>
         {selectedLocation && (
-          <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6"
+          >
             {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+            <div 
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
               onClick={() => setSelectedLocation(null)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
               aria-hidden="true"
             />
             
@@ -98,23 +100,24 @@ export const LocationsSection = () => {
               role="dialog"
               aria-modal="true"
               aria-labelledby="modal-title"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] md:w-full max-w-2xl bg-white rounded-2xl md:rounded-3xl shadow-2xl z-[101] overflow-hidden max-h-[85vh] flex flex-col"
+              className="relative w-full max-w-2xl bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="relative h-48 md:h-64 flex-shrink-0 bg-gray-100">
                 <img 
                   src={getOptimizedImageUrl(selectedLocation.image, 800)} 
                   alt={`${selectedLocation.name} real estate landscape`} 
                   className="w-full h-full object-cover"
-                  loading="eager" // Eager because modal is user-initiated
+                  loading="eager"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <button 
                   onClick={() => setSelectedLocation(null)}
-                  className="absolute top-4 right-4 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-white"
+                  className="absolute top-4 right-4 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-white z-10"
                   aria-label="Close modal"
                 >
                   <X size={20} />
@@ -130,7 +133,7 @@ export const LocationsSection = () => {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 overflow-y-auto flex-1">
+              <div className="p-6 md:p-8 overflow-y-auto flex-1 overscroll-contain">
                 <p className="text-gray-600 text-lg leading-relaxed mb-8">
                   {selectedLocation.longDescription}
                 </p>
@@ -155,7 +158,7 @@ export const LocationsSection = () => {
                 </button>
               </div>
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
     </section>
