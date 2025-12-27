@@ -1,1 +1,0 @@
-// This file is deprecated. Use components/Illustrations.tsx instead.
