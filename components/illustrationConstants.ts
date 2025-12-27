@@ -1,1 +1,0 @@
-// This file is deprecated. Constants moved to components/Illustrations.tsx.

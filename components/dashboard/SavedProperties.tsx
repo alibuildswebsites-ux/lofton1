@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Search, Loader2 } from 'lucide-react';
-import { getSavedProperties } from '../../lib/firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase.config';
 import { PropertyCard } from '../PropertyCard';
 import { useAuth } from '../../hooks/useAuth';
 import { Property } from '../../types';
+import { PROPERTIES } from '../../data';
 
 export const SavedProperties = () => {
   const { user } = useAuth();
@@ -15,10 +17,23 @@ export const SavedProperties = () => {
     const loadSaved = async () => {
       if (user) {
         setLoading(true);
-        const saved = await getSavedProperties(user.uid);
-        // Cast the result to Property[] assuming firestore returns matching shape or close enough
-        setSavedProperties(saved as Property[]);
-        setLoading(false);
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+            const savedIds = userDoc.data().savedProperties || [];
+            
+            // Bridge: Filter the static PROPERTIES array based on IDs saved in Firestore
+            // This ensures the dashboard works even without a populated 'properties' collection in DB
+            const filteredProperties = PROPERTIES.filter(p => savedIds.includes(p.id));
+            setSavedProperties(filteredProperties);
+          }
+        } catch (error) {
+          console.error("Error loading saved properties:", error);
+        } finally {
+          setLoading(false);
+        }
       }
     };
     loadSaved();
@@ -38,17 +53,17 @@ export const SavedProperties = () => {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Saved Properties</h1>
 
       {savedProperties.length === 0 ? (
-        <div className="bg-white rounded-xl p-12 shadow-sm text-center">
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="text-gray-400" size={32} />
+        <div className="bg-white rounded-xl p-12 shadow-sm text-center border border-gray-100">
+          <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Heart className="text-gray-300" size={32} />
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">No Saved Properties Yet</h2>
-          <p className="text-gray-500 mb-6 max-w-md mx-auto">
-            Start exploring our property listings and save your favorites to view them here.
+          <h2 className="text-xl font-bold text-charcoal mb-2">No Saved Properties Yet</h2>
+          <p className="text-gray-500 mb-8 max-w-md mx-auto">
+            Start exploring our property listings and click the heart icon to save your favorites.
           </p>
           <Link
             to="/property-listings"
-            className="inline-flex items-center gap-2 bg-brand text-white px-6 py-3 rounded-lg font-semibold hover:bg-brand/90 transition-colors"
+            className="inline-flex items-center gap-2 bg-brand text-white px-6 py-3 rounded-full font-bold hover:bg-brand-dark transition-colors shadow-lg shadow-brand/20"
           >
             <Search size={20} />
             Browse Properties

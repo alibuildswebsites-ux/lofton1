@@ -46,11 +46,11 @@ export const Navbar = () => {
   // Nav Items
   const navLinks = [
     { name: 'Home', path: '/', icon: Home },
-    { name: 'About Us', path: '/about', icon: Info },
-    { name: 'Property Listings', path: '/properties', icon: Grid },
-    { name: 'Buyer’s Guide', path: '/buy', icon: BookOpen },
-    { name: 'Seller’s Guide', path: '/sell', icon: TrendingUp },
-    { name: 'Contact Us', path: '/contact', icon: Mail },
+    { name: 'About Us', path: '/about-us', icon: Info },
+    { name: 'Property Listings', path: '/property-listings', icon: Grid },
+    { name: 'Buyer’s Guide', path: '/buyers-guide', icon: BookOpen },
+    { name: 'Seller’s Guide', path: '/sellers-guide', icon: TrendingUp },
+    { name: 'Contact Us', path: '/contact-us', icon: Mail },
   ];
 
   // Mobile Drawer Variants
@@ -208,7 +208,7 @@ export const Navbar = () => {
             )}
             
             <Link 
-              to="/contact"
+              to="/contact-us"
               className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-2.5 rounded-full font-semibold hover:scale-105 transition-all shadow-md hover:shadow-lg active:scale-95 inline-block"
             >
               Book Consultation
@@ -217,7 +217,7 @@ export const Navbar = () => {
 
           {/* Mobile Toggle */}
           <button 
-            className="lg:hidden text-gray-800 p-2 z-[101] relative rounded-md active:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+            className="lg:hidden text-gray-800 p-2 z-[103] relative rounded-md active:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
@@ -261,7 +261,7 @@ export const Navbar = () => {
               exit="closed"
               variants={backdropVariants}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] lg:hidden"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[101] lg:hidden"
               aria-hidden="true"
             />
             
@@ -275,7 +275,7 @@ export const Navbar = () => {
               animate="open"
               exit="closed"
               variants={drawerVariants}
-              className="fixed top-0 right-0 h-full w-[80%] max-w-[320px] bg-white z-[100] shadow-2xl lg:hidden flex flex-col pt-24 px-6 pb-8 overflow-y-auto"
+              className="fixed top-0 right-0 h-full w-[80%] max-w-[320px] bg-white z-[102] shadow-2xl lg:hidden flex flex-col pt-24 px-6 pb-8 overflow-y-auto"
             >
               <div className="flex flex-col gap-2 flex-grow">
                 {navLinks.map((link) => (
@@ -350,7 +350,7 @@ export const Navbar = () => {
                 </div>
 
                 <Link 
-                  to="/contact"
+                  to="/contact-us"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="bg-gradient-to-r from-brand to-brand-gradient text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-transform w-full mt-auto text-center"
                 >
