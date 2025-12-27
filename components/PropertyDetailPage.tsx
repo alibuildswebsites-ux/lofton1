@@ -31,7 +31,7 @@ export const PropertyDetailPage = () => {
         title: `${property.address} | Homes for Sale in ${property.city}, ${property.state}`,
         description: `View details for ${property.address}. ${property.beds} Bed, ${property.baths} Bath, ${property.price}. ${property.description?.substring(0, 120)}...`,
         image: property.images[0],
-        url: `https://loftonrealty.com/property-listings/${property.id}`,
+        url: `https://loftonrealty.com/properties/${property.id}`,
         type: 'article'
       });
 
@@ -94,7 +94,7 @@ export const PropertyDetailPage = () => {
         <div className="text-center p-8">
           <h2 className="text-3xl font-bold text-charcoal mb-4">Property Not Found</h2>
           <p className="text-gray-500 mb-8">The listing you are looking for may have been removed or does not exist.</p>
-          <Link to="/property-listings" className="bg-brand text-white px-6 py-3 rounded-full font-bold hover:bg-brand-dark transition-colors">
+          <Link to="/properties" className="bg-brand text-white px-6 py-3 rounded-full font-bold hover:bg-brand-dark transition-colors">
             Return to Properties
           </Link>
         </div>
@@ -133,9 +133,9 @@ export const PropertyDetailPage = () => {
         <div className="max-w-[1280px] mx-auto px-5 md:px-10 flex items-center gap-2 text-sm text-gray-500 overflow-x-auto whitespace-nowrap">
           <Link to="/" className="hover:text-brand transition-colors">Home</Link>
           <span className="text-gray-300">/</span>
-          <Link to="/property-listings" className="hover:text-brand transition-colors">Property Listings</Link>
+          <Link to="/properties" className="hover:text-brand transition-colors">Properties</Link>
           <span className="text-gray-300">/</span>
-          <Link to={`/property-listings?location=${encodeURIComponent(property.location)}`} className="hover:text-brand transition-colors">{property.city}</Link>
+          <Link to={`/properties?location=${encodeURIComponent(property.location)}`} className="hover:text-brand transition-colors">{property.city}</Link>
           <span className="text-gray-300">/</span>
           <span className="font-semibold text-charcoal truncate">{property.address}</span>
         </div>
@@ -354,7 +354,7 @@ export const PropertyDetailPage = () => {
                      <a href="mailto:Info@LoftonRealty.com" className="flex items-center justify-center gap-2 w-full bg-white border-2 border-charcoal text-charcoal py-3 rounded-lg font-bold hover:bg-gray-50 transition-colors">
                        <Mail size={18} /> Email Agent
                      </a>
-                     <Link to="/contact-us" className="flex items-center justify-center gap-2 w-full bg-gray-100 text-charcoal py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors">
+                     <Link to="/contact" className="flex items-center justify-center gap-2 w-full bg-gray-100 text-charcoal py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors">
                        <Calendar size={18} /> Schedule Tour
                      </Link>
                    </div>
@@ -395,7 +395,7 @@ export const PropertyDetailPage = () => {
              Pictures can only say so much. Schedule a private tour of {property.address} today.
            </p>
            <Link 
-             to="/contact-us" 
+             to="/contact" 
              className="inline-flex items-center gap-2 bg-brand text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-brand-dark transition-colors shadow-lg shadow-brand/20"
            >
              Schedule a Tour Today <ArrowRight size={20} />

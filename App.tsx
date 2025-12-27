@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ScrollToTop } from './components/ScrollToTop';
 import { Loader2 } from 'lucide-react';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 // Lazy load pages to split code into smaller chunks
 // This ensures users only download the code for the page they are viewing
@@ -18,8 +19,12 @@ const NotFound = lazy(() => import('./components/NotFound').then(module => ({ de
 const LoginPage = lazy(() => import('./components/auth/LoginPage'));
 const SignupPage = lazy(() => import('./components/auth/SignupPage'));
 const ForgotPasswordPage = lazy(() => import('./components/auth/ForgotPasswordPage'));
-const Dashboard = lazy(() => import('./components/Dashboard').then(module => ({ default: module.Dashboard })));
-const ProtectedRoute = lazy(() => import('./components/auth/ProtectedRoute').then(module => ({ default: module.ProtectedRoute })));
+
+// New Dashboard Components
+const DashboardLayout = lazy(() => import('./components/dashboard/DashboardLayout'));
+const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'));
+const ProfileSettings = lazy(() => import('./components/dashboard/ProfileSettings'));
+const SavedProperties = lazy(() => import('./components/dashboard/SavedProperties'));
 
 // Global Loading Spinner for Route Transitions
 const PageLoader = () => (
@@ -36,25 +41,32 @@ function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<LoftonRealtyHome />} />
-          <Route path="/property-listings" element={<PropertyListings />} />
-          <Route path="/property-listings/:id" element={<PropertyDetailPage />} />
-          <Route path="/buyers-guide" element={<BuyerGuide />} />
-          <Route path="/sellers-guide" element={<SellerGuide />} />
-          <Route path="/contact-us" element={<ContactPage />} />
-          <Route path="/about-us" element={<AboutPage />} />
+          <Route path="/properties" element={<PropertyListings />} />
+          <Route path="/properties/:id" element={<PropertyDetailPage />} />
+          <Route path="/buy" element={<BuyerGuide />} />
+          <Route path="/sell" element={<SellerGuide />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route 
-            path="/dashboard" 
+          
+          {/* Dashboard Routes - Protected */}
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <DashboardLayout />
               </ProtectedRoute>
-            } 
-          />
+            }
+          >
+            <Route index element={<DashboardHome />} />
+            <Route path="profile" element={<ProfileSettings />} />
+            <Route path="saved" element={<SavedProperties />} />
+          </Route>
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

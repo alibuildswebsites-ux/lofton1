@@ -61,7 +61,7 @@ export const Hero = () => {
           <div className="mt-[32px] flex flex-col sm:flex-row gap-[16px] w-full sm:w-auto justify-center animate-in fade-in slide-in-from-bottom-6 duration-700 delay-400">
             {/* Button 1 */}
             <Link 
-              to="/property-listings"
+              to="/properties"
               className="flex items-center justify-center gap-2 bg-charcoal-dark text-white px-[32px] py-[14px] rounded-[8px] font-semibold text-[16px] hover:bg-black hover:scale-[1.02] transition-all duration-300 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
             >
               <Home size={20} />
@@ -70,7 +70,7 @@ export const Hero = () => {
             
             {/* Button 2 */}
             <Link 
-              to="/contact-us"
+              to="/contact"
               className="flex items-center justify-center gap-2 bg-white text-charcoal-dark border-2 border-gray-200 px-[32px] py-[14px] rounded-[8px] font-semibold text-[16px] hover:border-brand hover:text-brand transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
             >
               <Mail size={20} />

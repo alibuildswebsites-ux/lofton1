@@ -37,7 +37,7 @@ export const Footer = () => {
               <Link to="/signup" className="text-gray-400 hover:text-white transition-colors text-sm rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal-dark">
                 Sign Up
               </Link>
-              <Link to="/property-listings" className="text-gray-400 hover:text-white transition-colors text-sm rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal-dark">
+              <Link to="/properties" className="text-gray-400 hover:text-white transition-colors text-sm rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-charcoal-dark">
                 View Properties
               </Link>
             </div>
