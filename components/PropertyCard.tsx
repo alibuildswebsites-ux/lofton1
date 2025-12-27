@@ -127,7 +127,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
                    src={getOptimizedImageUrl(img, 800)}
                    alt={`Property at ${property.address} - View ${idx + 1}`}
                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${imageLoaded ? 'blur-0' : 'blur-sm'}`}
-                   loading="lazy"
+                   loading="eager"
                    width="400"
                    height="300"
                    onLoad={() => idx === currentImageIndex && setImageLoaded(true)}

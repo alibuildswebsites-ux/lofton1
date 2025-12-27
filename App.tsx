@@ -4,10 +4,11 @@ import { ScrollToTop } from './components/ScrollToTop';
 import { Loader2 } from 'lucide-react';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
-// Lazy load pages to split code into smaller chunks
-// This ensures users only download the code for the page they are viewing
-const LoftonRealtyHome = lazy(() => import('./components/LoftonRealtyHome'));
-const PropertyListings = lazy(() => import('./components/PropertyListings').then(module => ({ default: module.PropertyListings })));
+// Static imports for main pages to remove lazy loading delay
+import LoftonRealtyHome from './components/LoftonRealtyHome';
+import { PropertyListings } from './components/PropertyListings';
+
+// Lazy load other secondary pages
 const PropertyDetailPage = lazy(() => import('./components/PropertyDetailPage').then(module => ({ default: module.PropertyDetailPage })));
 const BuyerGuide = lazy(() => import('./components/BuyerGuide').then(module => ({ default: module.BuyerGuide })));
 const SellerGuide = lazy(() => import('./components/SellerGuide').then(module => ({ default: module.SellerGuide })));
@@ -26,7 +27,7 @@ const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'))
 const ProfileSettings = lazy(() => import('./components/dashboard/ProfileSettings'));
 const SavedProperties = lazy(() => import('./components/dashboard/SavedProperties'));
 
-// Global Loading Spinner for Route Transitions
+// Global Loading Spinner for Route Transitions (still used for secondary lazy routes)
 const PageLoader = () => (
   <div className="fixed inset-0 bg-white z-[9999] flex flex-col items-center justify-center">
     <Loader2 className="w-10 h-10 text-brand animate-spin mb-4" />

@@ -1,34 +1,18 @@
-import React, { Suspense, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Navbar } from './Navbar';
 import { Hero } from './Hero';
 import { SectionErrorBoundary } from './SectionErrorBoundary';
 import { updateSEO, injectJSONLD } from '../utils';
 
-// Lazy load sections
-const StatsBar = React.lazy(() => import('./StatsBar').then(module => ({ default: module.StatsBar })));
-const ServicesSection = React.lazy(() => import('./ServicesSection').then(module => ({ default: module.ServicesSection })));
-const FeaturedProperties = React.lazy(() => import('./FeaturedProperties').then(module => ({ default: module.FeaturedProperties })));
-const TrustSection = React.lazy(() => import('./TrustSection').then(module => ({ default: module.TrustSection })));
-const LocationsSection = React.lazy(() => import('./LocationsSection').then(module => ({ default: module.LocationsSection })));
-const TestimonialsSection = React.lazy(() => import('./TestimonialsSection').then(module => ({ default: module.TestimonialsSection })));
-const ContactFormSection = React.lazy(() => import('./ContactFormSection').then(module => ({ default: module.ContactFormSection })));
-const Footer = React.lazy(() => import('./Footer').then(module => ({ default: module.Footer })));
-
-// Enhanced Loading Skeleton that looks like content
-const SectionLoader = () => (
-  <div className="w-full py-24 px-5 md:px-10 max-w-[1280px] mx-auto">
-    <div className="flex flex-col items-center space-y-6 mb-16">
-      <div className="w-32 h-4 bg-gray-100 rounded-full animate-pulse" />
-      <div className="w-3/4 md:w-1/2 h-10 bg-gray-200 rounded-lg animate-pulse" />
-      <div className="w-full md:w-2/3 h-4 bg-gray-50 rounded animate-pulse" />
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="bg-gray-50 rounded-2xl h-80 animate-pulse border border-gray-100" />
-      ))}
-    </div>
-  </div>
-);
+// Static imports to remove lazy loading
+import { StatsBar } from './StatsBar';
+import { ServicesSection } from './ServicesSection';
+import { FeaturedProperties } from './FeaturedProperties';
+import { TrustSection } from './TrustSection';
+import { LocationsSection } from './LocationsSection';
+import { TestimonialsSection } from './TestimonialsSection';
+import { ContactFormSection } from './ContactFormSection';
+import { Footer } from './Footer';
 
 const LoftonRealtyHome = () => {
   useEffect(() => {
@@ -65,51 +49,35 @@ const LoftonRealtyHome = () => {
         <Hero />
         
         <SectionErrorBoundary>
-          <Suspense fallback={<SectionLoader />}>
-            <StatsBar />
-          </Suspense>
+          <StatsBar />
         </SectionErrorBoundary>
 
         <SectionErrorBoundary>
-          <Suspense fallback={<SectionLoader />}>
-            <ServicesSection />
-          </Suspense>
+          <ServicesSection />
         </SectionErrorBoundary>
 
         <SectionErrorBoundary>
-          <Suspense fallback={<SectionLoader />}>
-            <FeaturedProperties />
-          </Suspense>
+          <FeaturedProperties />
         </SectionErrorBoundary>
 
         <SectionErrorBoundary>
-          <Suspense fallback={<SectionLoader />}>
-            <TrustSection />
-          </Suspense>
+          <TrustSection />
         </SectionErrorBoundary>
 
         <SectionErrorBoundary>
-          <Suspense fallback={<SectionLoader />}>
-            <LocationsSection />
-          </Suspense>
+          <LocationsSection />
         </SectionErrorBoundary>
 
         <SectionErrorBoundary>
-          <Suspense fallback={<SectionLoader />}>
-            <TestimonialsSection />
-          </Suspense>
+          <TestimonialsSection />
         </SectionErrorBoundary>
 
         <SectionErrorBoundary>
-          <Suspense fallback={<SectionLoader />}>
-            <ContactFormSection />
-          </Suspense>
+          <ContactFormSection />
         </SectionErrorBoundary>
 
         <SectionErrorBoundary>
-          <Suspense fallback={<div className="h-[300px] w-full bg-charcoal-dark animate-pulse" />}>
-            <Footer />
-          </Suspense>
+          <Footer />
         </SectionErrorBoundary>
       </main>
     </div>
