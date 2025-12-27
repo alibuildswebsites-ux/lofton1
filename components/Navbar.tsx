@@ -50,17 +50,17 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
   // Nav Items Definitions
   const publicLinks = [
     { name: 'Home', path: '/', icon: Home },
-    { name: 'About', path: '/about-us', icon: Info },
-    { name: 'Listings', path: '/property-listings', icon: Grid },
-    { name: 'Buy', path: '/buyers-guide', icon: BookOpen },
-    { name: 'Sell', path: '/sellers-guide', icon: TrendingUp },
-    { name: 'Contact', path: '/contact-us', icon: Mail },
+    { name: 'About Us', path: '/about-us', icon: Info },
+    { name: 'Property Listings', path: '/property-listings', icon: Grid },
+    { name: 'Buyer\'s Guide', path: '/buyers-guide', icon: BookOpen },
+    { name: 'Seller\'s Guide', path: '/sellers-guide', icon: TrendingUp },
+    { name: 'Contact Us', path: '/contact-us', icon: Mail },
   ];
 
   const dashboardSpecificLinks = [
     { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Saved', path: '/dashboard/saved', icon: Heart },
-    { name: 'Settings', path: '/dashboard/profile', icon: UserIcon },
+    { name: 'Saved Properties', path: '/dashboard/saved', icon: Heart },
+    { name: 'Profile Settings', path: '/dashboard/profile', icon: UserIcon },
   ];
 
   // Combine links for dashboard variant
@@ -117,7 +117,7 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
         }`}
       >
         {/* Adjusted padding and max-width for cleaner fit on large screens with many links */}
-        <div className="max-w-[1440px] mx-auto px-5 md:px-6 lg:px-8 flex justify-between items-center h-full">
+        <div className="max-w-[1600px] mx-auto px-5 md:px-6 lg:px-8 flex justify-between items-center h-full">
           {/* Logo (Left) */}
           <Link 
             to={variant === 'dashboard' ? '/dashboard' : '/'} 
@@ -128,13 +128,13 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
           </Link>
 
           {/* Desktop Menu (Center) */}
-          {/* Using gap-3 on LG and gap-6 on XL to accommodate the large number of links */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-5 flex-wrap justify-center">
+          {/* Using gap-3 on LG and gap-5 on XL to accommodate the large number of links */}
+          <div className="hidden lg:flex items-center gap-3 xl:gap-5 flex-wrap justify-center flex-1 px-4">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 
                 to={link.path}
-                className={`text-sm font-medium transition-colors relative group py-1 px-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 whitespace-nowrap ${
+                className={`text-[13px] xl:text-sm font-medium transition-colors relative group py-1 px-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 whitespace-nowrap ${
                   isActive(link.path) ? 'text-brand' : 'text-gray-600 hover:text-brand'
                 }`}
               >
