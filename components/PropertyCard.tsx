@@ -104,7 +104,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
       <div className={`relative overflow-hidden bg-gray-100 ${isList ? 'w-full md:w-[320px] h-[240px] md:h-auto shrink-0' : 'h-[240px] lg:h-[260px] w-full'}`}>
          
          {/* Images */}
-         {!imageError ? (
+         {!imageError && property.images.length > 0 ? (
            property.images.map((img, idx) => (
              <div 
                key={idx}
@@ -117,8 +117,6 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
                    alt={`Property at ${property.address} - View ${idx + 1}`}
                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                    loading="eager"
-                   width="400"
-                   height="300"
                    onError={() => setImageError(true)}
                  />
                )}
@@ -143,7 +141,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
            </span>
          </div>
 
-         {/* Carousel Controls - Always visible on mobile, Hover on Desktop */}
+         {/* Carousel Controls */}
          {property.images.length > 1 && !imageError && (
            <>
              <button 
@@ -176,7 +174,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
          {/* Gradient Overlay */}
          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
-         {/* Favorite Button - Always visible on mobile or if active, Hover on Desktop */}
+         {/* Favorite Button */}
          <button 
             onClick={toggleFavorite}
             className={`absolute top-4 right-4 z-20 bg-white/90 backdrop-blur p-2 rounded-full shadow-md hover:bg-white transition-all duration-200 
@@ -193,7 +191,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
         <div>
           <div className="flex justify-between items-start mb-2">
              <h3 className="text-2xl font-bold text-charcoal">
-               {typeof property.price === 'number' ? `$${property.price.toLocaleString()}` : property.price}
+               ${property.price.toLocaleString()}
              </h3>
           </div>
           <p className="text-gray-700 font-semibold text-lg mb-1 truncate">{property.address}</p>
@@ -212,7 +210,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, viewMode =
             </div>
             <div className="flex items-center gap-2">
               <Maximize size={18} className="text-gray-400" />
-              <span><strong className="text-gray-800">{typeof property.sqft === 'number' ? property.sqft.toLocaleString() : property.sqft}</strong> Sqft</span>
+              <span><strong className="text-gray-800">{property.sqft.toLocaleString()}</strong> Sqft</span>
             </div>
           </div>
         </div>

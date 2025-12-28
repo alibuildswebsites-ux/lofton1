@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Property } from '../../types';
 import { X, Upload, Plus, Trash2, Eye, Save, Loader2, Video, Image as ImageIcon } from 'lucide-react';
-import { addProperty, updateProperty, processFilesForStorage } from '../../lib/firebase/firestore';
+import { addProperty, updateProperty, uploadFiles, setPropertyWithId } from '../../lib/firebase/firestore';
 import { PropertyCard } from '../PropertyCard';
+import { collection, doc } from 'firebase/firestore';
+import { db } from '../../firebase.config';
 
 interface AdminPropertyFormProps {
   initialData?: Property;
@@ -37,6 +39,9 @@ export const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({ initialDat
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
+  
+  // Create a pending ID for new properties to allow uploads before save
+  const [pendingId] = useState(() => initialData?.id || doc(collection(db, 'properties')).id);
 
   useEffect(() => {
     if (initialData) {
@@ -77,14 +82,15 @@ export const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({ initialDat
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setUploadingMedia(true);
-      // Explicitly cast to File[] or use Array.from which returns File[] from FileList in modern browsers/TS
       const files = Array.from(e.target.files) as File[];
       try {
-        const base64Images = await processFilesForStorage(files);
-        setFormData(prev => ({ ...prev, images: [...prev.images, ...base64Images] }));
+        // Upload using local server API
+        // Store in a folder named after the property ID
+        const uploadedPaths = await uploadFiles(files, `properties/${pendingId}`);
+        setFormData(prev => ({ ...prev, images: [...prev.images, ...uploadedPaths] }));
       } catch (error) {
         console.error("Image upload failed", error);
-        alert("Failed to process images.");
+        alert("Failed to upload images. Check that the local server is running.");
       } finally {
         setUploadingMedia(false);
       }
@@ -100,10 +106,11 @@ export const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({ initialDat
       }
       setUploadingMedia(true);
       try {
-        const base64Video = await processFilesForStorage([file]);
-        setFormData(prev => ({ ...prev, videos: [...prev.videos, ...base64Video] }));
+        const uploadedPaths = await uploadFiles([file], `properties/${pendingId}`);
+        setFormData(prev => ({ ...prev, videos: [...prev.videos, ...uploadedPaths] }));
       } catch (error) {
         console.error("Video upload failed", error);
+        alert("Failed to upload video.");
       } finally {
         setUploadingMedia(false);
       }
@@ -121,13 +128,19 @@ export const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({ initialDat
     try {
       // Construct full address
       const fullAddress = `${formData.street}, ${formData.city}, ${formData.state} ${formData.zip}`;
-      const submissionData = { ...formData, address: fullAddress };
+      // Ensure sqft is number
+      const submissionData = { 
+        ...formData, 
+        address: fullAddress,
+        sqft: Number(formData.sqft) 
+      };
 
       let result;
       if (initialData?.id) {
         result = await updateProperty(initialData.id, submissionData);
       } else {
-        result = await addProperty(submissionData);
+        // Use the pending ID we generated for uploads
+        result = await setPropertyWithId(pendingId, submissionData);
       }
 
       if (result.success) {
@@ -415,7 +428,7 @@ export const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({ initialDat
              {formData.images.length > 0 && (
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 mt-4">
                    {formData.images.map((img, i) => (
-                      <div key={i} className="relative aspect-square rounded-lg overflow-hidden group border border-gray-200">
+                      <div key={i} className="relative aspect-square rounded-lg overflow-hidden group border border-gray-200 bg-gray-100">
                          <img src={img} alt="" className="w-full h-full object-cover" />
                          <button 
                             type="button" 

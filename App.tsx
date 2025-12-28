@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { ScrollToTop } from './components/ScrollToTop';
 import { Loader2 } from 'lucide-react';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { AdminRoute } from './components/auth/AdminRoute';
 
 // Static imports for main pages to remove lazy loading delay
 import LoftonRealtyHome from './components/LoftonRealtyHome';
@@ -77,8 +78,16 @@ function App() {
             <Route index element={<DashboardHome />} />
             <Route path="profile" element={<ProfileSettings />} />
             <Route path="saved" element={<SavedProperties />} />
-            {/* Added Admin Route under Dashboard for simplicity in this demo */}
-            <Route path="admin" element={<AdminDashboard />} />
+            
+            {/* Admin Routes - Secured */}
+            <Route 
+              path="admin" 
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
+              } 
+            />
           </Route>
           
           <Route path="*" element={<NotFound />} />

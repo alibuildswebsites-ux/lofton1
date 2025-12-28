@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { BlogPost } from '../../types';
-import { X, Upload, Save, Loader2, Image as ImageIcon, Eye, ArrowLeft } from 'lucide-react';
-import { addBlog, updateBlog, processFilesForStorage } from '../../lib/firebase/firestore';
+import { X, Upload, Save, Loader2, Image as ImageIcon, Eye, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { addBlog, updateBlog, uploadFiles } from '../../lib/firebase/firestore';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../hooks/useAuth';
+import { sanitizeHtml } from '../../lib/sanitizeHtml';
 
 interface AdminBlogFormProps {
   initialData?: BlogPost;
@@ -76,11 +77,12 @@ export const AdminBlogForm: React.FC<AdminBlogFormProps> = ({ initialData, onSuc
       setUploadingImage(true);
       try {
         const file = e.target.files[0];
-        const base64 = await processFilesForStorage([file]);
-        setFormData(prev => ({ ...prev, featuredImage: base64[0] }));
+        // Use local API upload
+        const paths = await uploadFiles([file], 'blogs');
+        setFormData(prev => ({ ...prev, featuredImage: paths[0] }));
       } catch (error) {
         console.error("Image upload failed", error);
-        alert("Failed to process image.");
+        alert("Failed to upload image. Ensure the local server is running.");
       } finally {
         setUploadingImage(false);
       }
@@ -142,7 +144,7 @@ export const AdminBlogForm: React.FC<AdminBlogFormProps> = ({ initialData, onSuc
            <div className="mb-8 h-64 md:h-96 rounded-2xl overflow-hidden bg-gray-100">
              {formData.featuredImage && <img src={formData.featuredImage} className="w-full h-full object-cover" />}
            </div>
-           <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: formData.content }} />
+           <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(formData.content) }} />
         </div>
       </div>
     );
@@ -181,7 +183,12 @@ export const AdminBlogForm: React.FC<AdminBlogFormProps> = ({ initialData, onSuc
           </div>
 
           <div>
-             <label className="block text-sm font-bold text-gray-700 mb-2">Content</label>
+             <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-bold text-gray-700">Content</label>
+                <div className="text-xs text-orange-600 flex items-center gap-1 font-medium bg-orange-50 px-2 py-1 rounded">
+                   <AlertTriangle size={12} /> External content is sanitized for security
+                </div>
+             </div>
              <div className="bg-white rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
                <ReactQuill 
                  theme="snow" 

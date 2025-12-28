@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { TESTIMONIALS } from '../data';
+import { getTestimonials } from '../lib/firebase/firestore';
+import { Testimonial } from '../types';
 import { getOptimizedImageUrl, updateSEO } from '../utils';
 import { SharedContactForm } from './SharedContactForm';
 
@@ -199,6 +200,8 @@ const ValuationTool = () => {
 // --- Main Page Component ---
 
 export const SellerGuide = () => {
+  const [sellerTestimonials, setSellerTestimonials] = useState<Testimonial[]>([]);
+
   useEffect(() => {
     updateSEO({
       title: "Seller's Guide | Home Valuation | Lofton Realty",
@@ -206,6 +209,16 @@ export const SellerGuide = () => {
       url: "https://loftonrealty.com/sellers-guide"
     });
     window.scrollTo(0, 0);
+
+    const loadTestimonials = async () => {
+      const data = await getTestimonials();
+      const filtered = data.filter(t => 
+        t.role.toLowerCase().includes('seller') || 
+        t.role.toLowerCase().includes('investor')
+      ).slice(0, 3);
+      setSellerTestimonials(filtered);
+    };
+    loadTestimonials();
   }, []);
 
   const steps: TimelineStep[] = [
@@ -270,12 +283,6 @@ export const SellerGuide = () => {
     { q: "How long will it take to sell?", a: "Our average time on market is 14 days, significantly faster than the market average. However, this varies by price point and neighborhood inventory." },
     { q: "What are seller closing costs?", a: "In Texas, sellers typically pay for the title policy, agent commissions, and pro-rated property taxes. Expect roughly 6-8% of the sales price in total closing costs." },
   ];
-
-  // Filter Seller Testimonials
-  const sellerTestimonials = TESTIMONIALS.filter(t => 
-    t.role.toLowerCase().includes('seller') || 
-    t.role.toLowerCase().includes('investor')
-  ).slice(0, 3);
 
   const heroBg = "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1920&q=80";
 

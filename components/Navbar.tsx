@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, Menu, X, ChevronDown, User as UserIcon, LogOut, 
   LayoutDashboard, Settings, FileText, Users, BookOpen, 
-  TrendingUp, Info, Mail, Grid 
+  TrendingUp, Info, Mail, Grid, ShieldCheck 
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { logOut } from '../lib/firebase/auth';
+import { logOut, checkIsAdmin } from '../lib/firebase/auth';
 
 interface NavbarProps {
   variant?: 'public' | 'dashboard';
@@ -17,7 +17,8 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isResourcesOpen, setIsResourcesOpen] = useState(false); // For Mobile Accordion
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Desktop hover state for Resources
   const [hoverResource, setHoverResource] = useState(false);
@@ -27,6 +28,17 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
   const { user } = useAuth();
   const currentPath = location.pathname;
   const timeoutRef = useRef<any>(null);
+
+  // Check admin status
+  useEffect(() => {
+    const verifyAdmin = async () => {
+      if (user) {
+        const adminStatus = await checkIsAdmin(user.email);
+        setIsAdmin(adminStatus);
+      }
+    };
+    verifyAdmin();
+  }, [user]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -227,6 +239,15 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
                           >
                             <LayoutDashboard size={16} /> Dashboard
                           </Link>
+                          {isAdmin && (
+                            <Link 
+                              to="/dashboard/admin" 
+                              onClick={() => setIsUserMenuOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-purple-700 hover:bg-purple-50 transition-colors"
+                            >
+                              <ShieldCheck size={16} /> Admin Panel
+                            </Link>
+                          )}
                           <Link 
                             to="/dashboard/profile" 
                             onClick={() => setIsUserMenuOpen(false)}
@@ -389,6 +410,16 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
                       >
                         <LayoutDashboard size={20} /> Dashboard
                       </Link>
+
+                      {isAdmin && (
+                        <Link 
+                          to="/dashboard/admin"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-purple-50 text-purple-700 font-bold hover:bg-purple-100 transition-colors"
+                        >
+                          <ShieldCheck size={20} /> Admin Panel
+                        </Link>
+                      )}
                       
                       <Link 
                         to="/dashboard/profile"

@@ -7,7 +7,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { TESTIMONIALS } from '../data';
+import { getTestimonials } from '../lib/firebase/firestore';
 import { Testimonial } from '../types';
 import { getOptimizedImageUrl, updateSEO } from '../utils';
 import { SharedContactForm } from './SharedContactForm';
@@ -129,6 +129,7 @@ const MortgageCalculator = () => {
 
 export const BuyerGuide = () => {
   const [activeStep, setActiveStep] = useState<string>('step-1');
+  const [buyerTestimonials, setBuyerTestimonials] = useState<Testimonial[]>([]);
   const navigate = useNavigate();
 
   // Update SEO
@@ -139,6 +140,16 @@ export const BuyerGuide = () => {
       url: "https://loftonrealty.com/buyers-guide"
     });
     window.scrollTo(0, 0);
+
+    const loadTestimonials = async () => {
+      const data = await getTestimonials();
+      const filtered = data.filter(t => 
+        t.role.toLowerCase().includes('buyer') || 
+        t.role.toLowerCase().includes('relocation')
+      ).slice(0, 3);
+      setBuyerTestimonials(filtered);
+    };
+    loadTestimonials();
   }, []);
 
   // Steps Data
@@ -254,12 +265,6 @@ export const BuyerGuide = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // Filter Buyer Testimonials
-  const buyerTestimonials = TESTIMONIALS.filter(t => 
-    t.role.toLowerCase().includes('buyer') || 
-    t.role.toLowerCase().includes('relocation')
-  ).slice(0, 3);
 
   const heroBg = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1920&q=80";
 

@@ -7,6 +7,7 @@ import { BlogPost as BlogPostType } from '../../types';
 import { Loader2, Calendar, Clock, User, ArrowLeft, Tag } from 'lucide-react';
 import { updateSEO, injectJSONLD, getOptimizedImageUrl } from '../../utils';
 import { BlogCard } from './BlogCard';
+import { sanitizeHtml } from '../../lib/sanitizeHtml';
 
 export const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -137,7 +138,7 @@ export const BlogPost = () => {
         <div className="max-w-3xl mx-auto px-5 md:px-10">
           <div 
             className="prose prose-lg prose-gray max-w-none prose-headings:font-extrabold prose-headings:text-charcoal prose-a:text-brand prose-img:rounded-xl"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
           />
 
           {/* Tags */}

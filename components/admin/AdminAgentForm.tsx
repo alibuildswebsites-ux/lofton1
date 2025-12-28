@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Agent } from '../../types';
 import { X, Upload, Save, Loader2, Image as ImageIcon, ArrowLeft } from 'lucide-react';
-import { addAgent, updateAgent, processFilesForStorage } from '../../lib/firebase/firestore';
+import { addAgent, updateAgent, uploadFiles } from '../../lib/firebase/firestore';
 
 interface AdminAgentFormProps {
   initialData?: Agent;
@@ -67,11 +67,11 @@ export const AdminAgentForm: React.FC<AdminAgentFormProps> = ({ initialData, onS
 
       setUploadingImage(true);
       try {
-        const base64 = await processFilesForStorage([file]);
-        setFormData(prev => ({ ...prev, photo: base64[0] }));
+        const paths = await uploadFiles([file], 'agents');
+        setFormData(prev => ({ ...prev, photo: paths[0] }));
       } catch (error) {
         console.error("Image upload failed", error);
-        alert("Failed to process image.");
+        alert("Failed to upload image. Ensure local server is running.");
       } finally {
         setUploadingImage(false);
       }

@@ -13,27 +13,51 @@ import {
   arrayUnion,
   arrayRemove,
   addDoc,
-  Timestamp,
   writeBatch,
   increment
 } from 'firebase/firestore';
 import { db } from '../../firebase.config';
 import { Property, BlogPost, Agent, Testimonial, UserProfile } from '../../types';
 
-// --- Helpers ---
+// --- File Upload Helper ---
 
-const readFileAsBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+export const uploadFiles = async (files: File[], folderName: string): Promise<string[]> => {
+  const uploadedPaths: string[] = [];
+  const formData = new FormData();
+  
+  // Group files into formData
+  files.forEach(file => {
+    formData.append('files', file);
   });
+  formData.append('folder', folderName);
+
+  try {
+    // Post to local server endpoint
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    if (data.success && Array.isArray(data.filePaths)) {
+      return data.filePaths;
+    } else {
+      throw new Error('Invalid response from upload server');
+    }
+  } catch (error) {
+    console.error("File upload error:", error);
+    throw error;
+  }
 };
 
+// Kept for backward compatibility but deprecated
 export const processFilesForStorage = async (files: File[]): Promise<string[]> => {
-  const promises = files.map(file => readFileAsBase64(file));
-  return Promise.all(promises);
+  console.warn("processFilesForStorage is deprecated. Use uploadFiles instead.");
+  return [];
 };
 
 // --- Properties CRUD ---
@@ -68,19 +92,37 @@ export const getPropertyById = async (id: string) => {
 
 export const addProperty = async (propertyData: Omit<Property, 'id'>) => {
   try {
-    const propertiesRef = collection(db, 'properties');
+    // Generate a new ID first to create a folder for images
+    const newDocRef = doc(collection(db, 'properties'));
     const now = new Date().toISOString();
     
-    const docRef = await addDoc(propertiesRef, {
+    await setDoc(newDocRef, {
       ...propertyData,
+      id: newDocRef.id,
       views: 0,
       createdAt: now,
       updatedAt: now
     });
     
-    return { success: true, id: docRef.id };
+    return { success: true, id: newDocRef.id };
   } catch (error: any) {
     console.error("Error adding property: ", error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Explicitly export setDoc wrapper for custom ID usage
+export const setPropertyWithId = async (id: string, propertyData: Omit<Property, 'id'>) => {
+  try {
+    const now = new Date().toISOString();
+    await setDoc(doc(db, 'properties', id), {
+      ...propertyData,
+      views: 0,
+      createdAt: now,
+      updatedAt: now
+    });
+    return { success: true, id };
+  } catch (error: any) {
     return { success: false, error: error.message };
   }
 };

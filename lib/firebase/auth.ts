@@ -11,6 +11,24 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../../firebase.config';
 
+// Helper for typed errors
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  return String(error);
+};
+
+// Check if a user is an admin
+export const checkIsAdmin = async (email: string | null): Promise<boolean> => {
+  if (!email) return false;
+  try {
+    const adminDoc = await getDoc(doc(db, 'admins', email));
+    return adminDoc.exists();
+  } catch (error) {
+    console.error("Error checking admin status:", error);
+    return false;
+  }
+};
+
 // Sign up with email and password
 export const signUpWithEmail = async (email: string, password: string, name: string) => {
   try {
@@ -30,8 +48,8 @@ export const signUpWithEmail = async (email: string, password: string, name: str
     });
     
     return { success: true, user };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 
@@ -40,8 +58,8 @@ export const signInWithEmail = async (email: string, password: string) => {
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return { success: true, user: userCredential.user };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 
@@ -66,8 +84,8 @@ export const signInWithGoogle = async () => {
     }
     
     return { success: true, user };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 
@@ -76,8 +94,8 @@ export const logOut = async () => {
   try {
     await signOut(auth);
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 
@@ -86,8 +104,8 @@ export const resetPassword = async (email: string) => {
   try {
     await sendPasswordResetEmail(auth, email);
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 
@@ -97,8 +115,8 @@ export const updateUserName = async (user: User, newName: string) => {
     await updateProfile(user, { displayName: newName });
     await setDoc(doc(db, 'users', user.uid), { name: newName }, { merge: true });
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 
@@ -107,7 +125,7 @@ export const updateUserPassword = async (user: User, newPassword: string) => {
   try {
     await updatePassword(user, newPassword);
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
   }
 };
