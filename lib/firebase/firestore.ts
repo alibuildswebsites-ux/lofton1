@@ -65,14 +65,26 @@ export const processFilesForStorage = async (files: File[]): Promise<string[]> =
 export const getProperties = async (status?: string) => {
   try {
     const propertiesRef = collection(db, 'properties');
-    let q = query(propertiesRef, orderBy('createdAt', 'desc'));
+    let q;
     
+    // To avoid "Index required" errors for composite queries (where + orderBy),
+    // we filter in DB and sort in memory if a filter is active.
     if (status && status !== 'All') {
-      q = query(propertiesRef, where('status', '==', status), orderBy('createdAt', 'desc'));
+      q = query(propertiesRef, where('status', '==', status));
+    } else {
+      // Single field sort does not require a composite index
+      q = query(propertiesRef, orderBy('createdAt', 'desc'));
     }
     
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Property));
+    const properties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Property));
+
+    // Ensure consistent sorting by createdAt descending (Newest first)
+    return properties.sort((a, b) => {
+      const dateA = new Date(a.createdAt || 0).getTime();
+      const dateB = new Date(b.createdAt || 0).getTime();
+      return dateB - dateA;
+    });
   } catch (error) {
     console.error('Error fetching properties:', error);
     return [];
@@ -170,14 +182,22 @@ export const incrementPropertyView = async (id: string) => {
 export const getBlogs = async (publishedOnly: boolean = true) => {
   try {
     const blogsRef = collection(db, 'blogs');
-    let q = query(blogsRef, orderBy('createdAt', 'desc'));
+    let q;
     
+    // To fix "The query requires an index" error:
+    // Avoid combining `where` and `orderBy` on different fields in the query
+    // unless a composite index exists. We fetch based on filter, then sort in memory.
     if (publishedOnly) {
-      q = query(blogsRef, where('published', '==', true), orderBy('createdAt', 'desc'));
+      q = query(blogsRef, where('published', '==', true));
+    } else {
+      q = query(blogsRef, orderBy('createdAt', 'desc'));
     }
     
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+    const blogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+
+    // Perform sort in memory
+    return blogs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   } catch (error) {
     console.error('Error fetching blogs:', error);
     return [];
