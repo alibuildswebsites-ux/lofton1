@@ -60,12 +60,6 @@ export const uploadFiles = async (files: File[], folderName: string): Promise<st
   }
 };
 
-// Kept for backward compatibility but deprecated
-export const processFilesForStorage = async (files: File[]): Promise<string[]> => {
-  console.warn("processFilesForStorage is deprecated. Use uploadFiles instead.");
-  return [];
-};
-
 // --- Properties CRUD ---
 
 export const getProperties = async (status?: string) => {

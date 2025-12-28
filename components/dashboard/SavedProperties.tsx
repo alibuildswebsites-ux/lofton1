@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Search, Loader2, Home } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebase.config';
+import { getSavedProperties } from '../../lib/firebase/firestore';
 import { PropertyCard } from '../PropertyCard';
 import { useAuth } from '../../hooks/useAuth';
 import { Property } from '../../types';
-import { PROPERTIES } from '../../data';
 import { motion } from 'framer-motion';
 
 export const SavedProperties = () => {
@@ -19,15 +17,9 @@ export const SavedProperties = () => {
       if (user) {
         setLoading(true);
         try {
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (userDoc.exists()) {
-            const savedIds = userDoc.data().savedProperties || [];
-            // Filter properties
-            const filteredProperties = PROPERTIES.filter(p => savedIds.includes(p.id));
-            setSavedProperties(filteredProperties);
-          }
+          // Use the dedicated Firestore helper to fetch real property details
+          const properties = await getSavedProperties(user.uid);
+          setSavedProperties(properties);
         } catch (error) {
           console.error("Error loading saved properties:", error);
         } finally {
