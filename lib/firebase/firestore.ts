@@ -5,16 +5,16 @@ import {
   getDocs, 
   setDoc, 
   updateDoc, 
-  deleteDoc,
-  query,
-  where,
-  orderBy,
-  limit,
-  arrayUnion,
-  arrayRemove,
-  addDoc,
-  writeBatch,
-  increment
+  deleteDoc, 
+  query, 
+  where, 
+  orderBy, 
+  limit, 
+  arrayUnion, 
+  arrayRemove, 
+  addDoc, 
+  writeBatch, 
+  increment 
 } from 'firebase/firestore';
 import { db } from '../../firebase.config';
 import { Property, BlogPost, Agent, Testimonial, UserProfile } from '../../types';
@@ -219,7 +219,7 @@ export const getBlogBySlug = async (slug: string) => {
   }
 };
 
-export const addBlog = async (blogData: Omit<BlogPost, 'id'>) => {
+export const addBlog = async (blogData: Omit<BlogPost, 'id' | 'createdAt' | 'updatedAt'>) => {
   try {
     const blogsRef = collection(db, 'blogs');
     const now = new Date().toISOString();
@@ -296,7 +296,7 @@ export const getAgentById = async (id: string) => {
   }
 };
 
-export const addAgent = async (agentData: Omit<Agent, 'id' | 'order'>) => {
+export const addAgent = async (agentData: Omit<Agent, 'id' | 'order' | 'createdAt' | 'updatedAt'>) => {
   try {
     const agentsRef = collection(db, 'agents');
     const now = new Date().toISOString();
