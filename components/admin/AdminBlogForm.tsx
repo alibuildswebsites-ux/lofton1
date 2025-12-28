@@ -3,7 +3,6 @@ import { BlogPost } from '../../types';
 import { X, Upload, Save, Loader2, Image as ImageIcon, Eye, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { addBlog, updateBlog, uploadFiles } from '../../lib/firebase/firestore';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../hooks/useAuth';
 import { sanitizeHtml } from '../../lib/sanitizeHtml';
 
