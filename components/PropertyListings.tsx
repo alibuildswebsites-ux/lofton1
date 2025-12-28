@@ -2,11 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { PropertyCard } from './PropertyCard';
-import { PROPERTIES } from '../data';
+import { getProperties } from '../lib/firebase/firestore';
 import { Property } from '../types';
-import { Filter, SlidersHorizontal, ChevronDown, Grid, List, Search, X, MapPin } from 'lucide-react';
+import { Filter, SlidersHorizontal, ChevronDown, Grid, List, Search, X, MapPin, Loader2, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { updateSEO } from '../utils';
 
 // --- Types ---
@@ -17,73 +17,93 @@ interface FilterState {
   maxPrice: number | '';
   beds: number | 'any';
   baths: number | 'any';
-  type: 'all' | 'buy' | 'rent';
+  types: string[]; // Changed to array for checkboxes
+  status: 'All' | 'For Sale' | 'For Rent' | 'Sold' | 'Rented';
 }
-
-// --- Helper Functions ---
-
-const parsePrice = (priceStr: string): number => {
-  // Removes '$', ',', and '/mo' to get raw number
-  return Number(priceStr.replace(/[^0-9.]/g, ''));
-};
-
-const locations = ['Houston, TX', 'Galveston, TX', 'Austin, TX', 'Louisiana', 'Mississippi', 'Florida'];
 
 export const PropertyListings = () => {
   // --- State ---
+  const [allProperties, setAllProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc' | 'sqft-desc'>('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const itemsPerPage = 6;
-  const locationParams = useLocation();
+  
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [filters, setFilters] = useState<FilterState>({
-    location: '',
-    minPrice: '',
-    maxPrice: '',
-    beds: 'any',
-    baths: 'any',
-    type: 'all'
+  // Initialize filters from URL params lazy to avoid sync issues
+  const [filters, setFilters] = useState<FilterState>(() => {
+    const locParam = searchParams.get('location');
+    const statusParam = searchParams.get('status');
+    const minParam = searchParams.get('min');
+    const maxParam = searchParams.get('max');
+
+    return {
+      location: locParam || '',
+      minPrice: minParam ? Number(minParam) : '',
+      maxPrice: maxParam ? Number(maxParam) : '',
+      beds: 'any',
+      baths: 'any',
+      types: [],
+      status: (statusParam as any) || 'All'
+    };
   });
+
+  // Extract unique locations and types for dropdowns
+  const availableLocations = useMemo(() => {
+    return Array.from(new Set(allProperties.map(p => p.city))).sort();
+  }, [allProperties]);
+
+  const availableTypes = ['House', 'Condo', 'Apartment', 'Townhouse', 'Land', 'Other'];
 
   // --- Effects ---
   
-  // Update SEO
   useEffect(() => {
     updateSEO({
       title: "Homes for Sale in Houston, TX | Lofton Realty",
       description: "Browse exclusive real estate listings in Houston, Galveston, Austin, and the Gulf Coast. Find your dream home with Lofton Realty.",
       url: "https://loftonrealty.com/properties"
     });
+    
+    // Fetch Properties
+    const fetchProps = async () => {
+      setLoading(true);
+      const data = await getProperties();
+      setAllProperties(data as Property[]);
+      setLoading(false);
+    };
+    fetchProps();
   }, []);
 
-  // Parse URL query parameters for initial filter state
+  // Sync state changes to URL
   useEffect(() => {
-    const params = new URLSearchParams(locationParams.search);
-    const locParam = params.get('location');
-    if (locParam) {
-      // Basic fuzzy match or direct match
-      const matchedLocation = locations.find(l => l.includes(locParam) || locParam.includes(l)) || locParam;
-      setFilters(prev => ({ ...prev, location: matchedLocation }));
-    }
-  }, [locationParams.search]);
+    const params: Record<string, string> = {};
+    if (filters.location) params.location = filters.location;
+    if (filters.status !== 'All') params.status = filters.status;
+    if (filters.minPrice) params.min = filters.minPrice.toString();
+    if (filters.maxPrice) params.max = filters.maxPrice.toString();
+    
+    setSearchParams(params, { replace: true });
+  }, [filters, setSearchParams]);
 
   // --- Filter Logic ---
 
   const filteredProperties = useMemo(() => {
-    return PROPERTIES.filter(property => {
-      const price = parsePrice(property.price);
+    return allProperties.filter(property => {
+      // Status
+      if (filters.status !== 'All' && property.status !== filters.status) return false;
+
+      // Location (City)
+      if (filters.location && property.city !== filters.location) return false;
       
-      // Location Match
-      if (filters.location && !property.location.includes(filters.location)) return false;
-      
-      // Type Match
-      if (filters.type !== 'all' && property.type !== filters.type) return false;
+      // Type Match (Array check)
+      if (filters.types.length > 0 && !filters.types.includes(property.type)) return false;
       
       // Price Range
-      if (filters.minPrice !== '' && price < filters.minPrice) return false;
-      if (filters.maxPrice !== '' && price > filters.maxPrice) return false;
+      if (filters.minPrice !== '' && property.price < filters.minPrice) return false;
+      if (filters.maxPrice !== '' && property.price > filters.maxPrice) return false;
       
       // Beds/Baths
       if (filters.beds !== 'any' && property.beds < filters.beds) return false;
@@ -91,7 +111,7 @@ export const PropertyListings = () => {
 
       return true;
     });
-  }, [filters]);
+  }, [filters, allProperties]);
 
   // --- Sort Logic ---
 
@@ -99,15 +119,15 @@ export const PropertyListings = () => {
     const sorted = [...filteredProperties];
     switch (sortBy) {
       case 'price-asc':
-        return sorted.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
+        return sorted.sort((a, b) => a.price - b.price);
       case 'price-desc':
-        return sorted.sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
+        return sorted.sort((a, b) => b.price - a.price);
       case 'sqft-desc':
-        return sorted.sort((a, b) => parseInt(b.sqft.replace(/,/g, '')) - parseInt(a.sqft.replace(/,/g, '')));
+        return sorted.sort((a, b) => b.sqft - a.sqft);
       case 'newest':
       default:
-        // Mocking date sort by putting 'New Listing' first or just assuming data order is chronological
-        return sorted.sort((a, b) => (a.status === 'New Listing' ? -1 : 1));
+        // Sort by id or createdAt if available
+        return sorted; // Firestore default is mostly time based if IDs are sequential or query is sorted
     }
   }, [filteredProperties, sortBy]);
 
@@ -121,7 +141,18 @@ export const PropertyListings = () => {
 
   const handleFilterChange = (key: keyof FilterState, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-    setCurrentPage(1); // Reset to page 1 on filter change
+    setCurrentPage(1);
+  };
+
+  const toggleType = (type: string) => {
+    setFilters(prev => {
+      const exists = prev.types.includes(type);
+      return {
+        ...prev,
+        types: exists ? prev.types.filter(t => t !== type) : [...prev.types, type]
+      };
+    });
+    setCurrentPage(1);
   };
 
   const clearFilters = () => {
@@ -131,53 +162,36 @@ export const PropertyListings = () => {
       maxPrice: '',
       beds: 'any',
       baths: 'any',
-      type: 'all'
+      types: [],
+      status: 'All'
     });
     setCurrentPage(1);
-    // Optionally clear URL param here if we were syncing back to URL
   };
 
-  // --- Render Components ---
+  // --- Sidebar Component ---
 
   const FilterSidebar = () => (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex items-center justify-between lg:hidden mb-6">
         <h3 className="text-xl font-bold text-charcoal">Filters</h3>
         <button onClick={() => setIsMobileFilterOpen(false)}><X size={24} /></button>
       </div>
 
-      {/* Property Type */}
+      {/* Status Tabs */}
       <div>
-        <h4 className="font-bold text-charcoal mb-3">Property Type</h4>
-        <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
-          {(['all', 'buy', 'rent'] as const).map((type) => (
-            <button
-              key={type}
-              onClick={() => handleFilterChange('type', type)}
-              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-                filters.type === type ? 'bg-white text-brand shadow-sm' : 'text-gray-500 hover:text-charcoal'
-              }`}
-            >
-              {type.charAt(0).toUpperCase() + type.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Location */}
-      <div>
-        <h4 className="font-bold text-charcoal mb-3">Location</h4>
-        <div className="relative">
-          <select
-            value={filters.location}
-            onChange={(e) => handleFilterChange('location', e.target.value)}
-            className="w-full appearance-none bg-white border border-gray-200 rounded-lg px-4 py-3 pr-10 outline-none focus:ring-2 focus:ring-brand focus:border-transparent text-gray-700 font-medium"
-          >
-            <option value="">All Locations</option>
-            {locations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+        <h4 className="font-bold text-charcoal mb-3">Status</h4>
+        <div className="flex flex-wrap gap-2">
+           {['All', 'For Sale', 'For Rent', 'Sold', 'Rented'].map((s) => (
+             <button
+               key={s}
+               onClick={() => handleFilterChange('status', s)}
+               className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all ${
+                 filters.status === s ? 'bg-brand text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+               }`}
+             >
+               {s}
+             </button>
+           ))}
         </div>
       </div>
 
@@ -209,11 +223,27 @@ export const PropertyListings = () => {
         </div>
       </div>
 
-      {/* Beds & Baths */}
+      {/* Location */}
+      <div>
+        <h4 className="font-bold text-charcoal mb-3">City</h4>
+        <div className="relative">
+          <select
+            value={filters.location}
+            onChange={(e) => handleFilterChange('location', e.target.value)}
+            className="w-full appearance-none bg-white border border-gray-200 rounded-lg px-4 py-3 pr-10 outline-none focus:ring-2 focus:ring-brand focus:border-transparent text-gray-700 font-medium"
+          >
+            <option value="">Any City</option>
+            {availableLocations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+        </div>
+      </div>
+
+      {/* Beds */}
       <div>
         <h4 className="font-bold text-charcoal mb-3">Bedrooms</h4>
         <div className="flex gap-2">
-           {[ 'any', 1, 2, 3, 4 ].map((num) => (
+           {[ 'any', 1, 2, 3, 4, 5 ].map((num) => (
              <button
                key={num}
                onClick={() => handleFilterChange('beds', num)}
@@ -229,10 +259,11 @@ export const PropertyListings = () => {
         </div>
       </div>
 
+      {/* Baths */}
       <div>
         <h4 className="font-bold text-charcoal mb-3">Bathrooms</h4>
         <div className="flex gap-2">
-           {[ 'any', 1, 2, 3 ].map((num) => (
+           {[ 'any', 1, 2, 3, 4 ].map((num) => (
              <button
                key={num}
                onClick={() => handleFilterChange('baths', num)}
@@ -248,8 +279,29 @@ export const PropertyListings = () => {
         </div>
       </div>
 
-      <button onClick={clearFilters} className="w-full py-2 text-sm text-gray-500 underline hover:text-brand">
-        Reset Filters
+      {/* Property Type */}
+      <div>
+        <h4 className="font-bold text-charcoal mb-3">Property Type</h4>
+        <div className="grid grid-cols-2 gap-2">
+          {availableTypes.map((type) => (
+            <label key={type} className="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={filters.types.includes(type)}
+                onChange={() => toggleType(type)}
+                className="w-4 h-4 accent-brand rounded"
+              />
+              <span className="text-sm text-gray-600">{type}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <button 
+        onClick={clearFilters} 
+        className="w-full py-3 flex items-center justify-center gap-2 text-sm font-bold text-gray-500 hover:text-charcoal bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+      >
+        <RefreshCw size={16} /> Reset Filters
       </button>
     </div>
   );
@@ -268,7 +320,7 @@ export const PropertyListings = () => {
              
              <div className="flex items-center gap-3">
                <span className="text-gray-500 font-medium hidden md:block">
-                 Showing {sortedProperties.length} Properties
+                 Found {sortedProperties.length} properties
                </span>
              </div>
           </div>
@@ -280,7 +332,7 @@ export const PropertyListings = () => {
           
           {/* Desktop Sidebar */}
           <aside className="hidden lg:block w-72 flex-shrink-0">
-             <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-24">
+             <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
                <FilterSidebar />
              </div>
           </aside>
@@ -352,11 +404,24 @@ export const PropertyListings = () => {
                </div>
             </div>
 
-            {/* Grid */}
-            {currentProperties.length > 0 ? (
+            {/* Content */}
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <Loader2 className="animate-spin text-brand" size={40} />
+              </div>
+            ) : currentProperties.length > 0 ? (
               <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1'}`}>
                 {currentProperties.map(property => (
-                  <PropertyCard key={property.id} property={property} viewMode={viewMode} />
+                  <PropertyCard 
+                    key={property.id} 
+                    property={{
+                      ...property, 
+                      // Convert number price to formatted string for Card compatibility if needed
+                      price: typeof property.price === 'number' ? `$${property.price.toLocaleString()}` : property.price,
+                      sqft: typeof property.sqft === 'number' ? property.sqft.toLocaleString() : property.sqft
+                    } as any} // Type assertion for compatibility during migration
+                    viewMode={viewMode} 
+                  />
                 ))}
               </div>
             ) : (
@@ -365,7 +430,7 @@ export const PropertyListings = () => {
                    <Search className="text-gray-400" size={32} />
                  </div>
                  <h3 className="text-xl font-bold text-charcoal mb-2">No properties match your criteria</h3>
-                 <p className="text-gray-500 max-w-sm mb-6">Try removing some filters or expanding your price range to see more results.</p>
+                 <p className="text-gray-500 max-w-sm mb-6">Try removing some filters or expanding your price range.</p>
                  <button 
                    onClick={clearFilters}
                    className="text-brand font-bold hover:underline"

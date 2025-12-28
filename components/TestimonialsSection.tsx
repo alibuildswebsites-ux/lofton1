@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Quote, ChevronLeft, ChevronRight } from 'lucide-react';
-import { TESTIMONIALS } from '../data';
+import { Quote, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { getTestimonials } from '../lib/firebase/firestore';
+import { Testimonial } from '../types';
 
 export const TestimonialsSection = () => {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [loading, setLoading] = useState(true);
   const [itemsPerPage, setItemsPerPage] = useState(1);
   const [currentPage, setCurrentPage] = useState(0);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      const data = await getTestimonials();
+      setTestimonials(data);
+      setLoading(false);
+    };
+    fetchTestimonials();
+  }, []);
 
   // Responsive items per page
   useEffect(() => {
@@ -20,31 +32,43 @@ export const TestimonialsSection = () => {
       setItemsPerPage(newItemsPerPage);
       // Ensure current page is valid when resizing
       setCurrentPage(current => {
-         const maxPage = Math.ceil(TESTIMONIALS.length / newItemsPerPage) - 1;
-         return Math.min(current, maxPage);
+         const maxPage = Math.ceil(testimonials.length / newItemsPerPage) - 1;
+         return Math.max(0, Math.min(current, maxPage));
       });
     };
 
     handleResize();
     window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [testimonials.length]);
 
-  const totalPages = Math.ceil(TESTIMONIALS.length / itemsPerPage);
+  const totalPages = Math.ceil(testimonials.length / itemsPerPage);
 
   const handleNext = () => {
-    setCurrentPage((prev) => (prev + 1) % totalPages);
+    if (totalPages > 0) setCurrentPage((prev) => (prev + 1) % totalPages);
   };
 
   const handlePrev = () => {
-    setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
+    if (totalPages > 0) setCurrentPage((prev) => (prev - 1 + totalPages) % totalPages);
   };
 
   // Pre-calculate chunks for rendering
   const chunks = [];
-  for (let i = 0; i < TESTIMONIALS.length; i += itemsPerPage) {
-    chunks.push(TESTIMONIALS.slice(i, i + itemsPerPage));
+  if (testimonials.length > 0) {
+    for (let i = 0; i < testimonials.length; i += itemsPerPage) {
+      chunks.push(testimonials.slice(i, i + itemsPerPage));
+    }
   }
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-white flex justify-center">
+        <Loader2 className="animate-spin text-brand" size={40} />
+      </section>
+    );
+  }
+
+  if (testimonials.length === 0) return null;
 
   return (
     <section className="py-[60px] md:py-[80px] lg:py-[100px] bg-white relative overflow-hidden" id="testimonials">
@@ -58,7 +82,6 @@ export const TestimonialsSection = () => {
              <span className="text-[13px] font-bold tracking-[2px] text-brand uppercase mb-3 block">Testimonials</span>
              <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-charcoal leading-tight tracking-tight">Stories from Home</h2>
           </div>
-          {/* Controls removed from here */}
         </div>
 
         {/* Carousel Content */}
@@ -101,7 +124,6 @@ export const TestimonialsSection = () => {
                       </div>
                     </div>
                   ))}
-                  {/* Spacer for empty slots to maintain grid layout consistency if needed, though grid handles it */}
                 </div>
             ))}
           </motion.div>
@@ -111,14 +133,16 @@ export const TestimonialsSection = () => {
         <div className="flex justify-end gap-3 mt-8">
             <button 
               onClick={handlePrev}
-              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-brand hover:text-brand transition-all active:scale-95 bg-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+              disabled={totalPages <= 1}
+              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-brand hover:text-brand transition-all active:scale-95 bg-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Previous testimonials"
             >
               <ChevronLeft size={24} />
             </button>
             <button 
               onClick={handleNext}
-              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-brand hover:text-brand transition-all active:scale-95 bg-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+              disabled={totalPages <= 1}
+              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-brand hover:text-brand transition-all active:scale-95 bg-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Next testimonials"
             >
               <ChevronRight size={24} />

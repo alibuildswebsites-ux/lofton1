@@ -11,22 +11,44 @@ import {
   orderBy,
   limit,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
+  addDoc,
+  Timestamp,
+  writeBatch,
+  increment
 } from 'firebase/firestore';
 import { db } from '../../firebase.config';
+import { Property, BlogPost, Agent, Testimonial, UserProfile } from '../../types';
 
-// Properties
+// --- Helpers ---
+
+const readFileAsBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+export const processFilesForStorage = async (files: File[]): Promise<string[]> => {
+  const promises = files.map(file => readFileAsBase64(file));
+  return Promise.all(promises);
+};
+
+// --- Properties CRUD ---
+
 export const getProperties = async (status?: string) => {
   try {
     const propertiesRef = collection(db, 'properties');
     let q = query(propertiesRef, orderBy('createdAt', 'desc'));
     
-    if (status) {
+    if (status && status !== 'All') {
       q = query(propertiesRef, where('status', '==', status), orderBy('createdAt', 'desc'));
     }
     
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Property));
   } catch (error) {
     console.error('Error fetching properties:', error);
     return [];
@@ -37,14 +59,327 @@ export const getPropertyById = async (id: string) => {
   try {
     const docRef = doc(db, 'properties', id);
     const docSnap = await getDoc(docRef);
-    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Property : null;
   } catch (error) {
     console.error('Error fetching property:', error);
     return null;
   }
 };
 
-// User saved properties
+export const addProperty = async (propertyData: Omit<Property, 'id'>) => {
+  try {
+    const propertiesRef = collection(db, 'properties');
+    const now = new Date().toISOString();
+    
+    const docRef = await addDoc(propertiesRef, {
+      ...propertyData,
+      views: 0,
+      createdAt: now,
+      updatedAt: now
+    });
+    
+    return { success: true, id: docRef.id };
+  } catch (error: any) {
+    console.error("Error adding property: ", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const updateProperty = async (id: string, propertyData: Partial<Property>) => {
+  try {
+    const docRef = doc(db, 'properties', id);
+    const now = new Date().toISOString();
+    
+    await updateDoc(docRef, {
+      ...propertyData,
+      updatedAt: now
+    });
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error updating property: ", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const deleteProperty = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, 'properties', id));
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error deleting property: ", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const incrementPropertyView = async (id: string) => {
+  try {
+    const docRef = doc(db, 'properties', id);
+    await updateDoc(docRef, {
+      views: increment(1)
+    });
+  } catch (error) {
+    console.error("Error incrementing view:", error);
+  }
+};
+
+// --- Blog CRUD ---
+
+export const getBlogs = async (publishedOnly: boolean = true) => {
+  try {
+    const blogsRef = collection(db, 'blogs');
+    let q = query(blogsRef, orderBy('createdAt', 'desc'));
+    
+    if (publishedOnly) {
+      q = query(blogsRef, where('published', '==', true), orderBy('createdAt', 'desc'));
+    }
+    
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+  } catch (error) {
+    console.error('Error fetching blogs:', error);
+    return [];
+  }
+};
+
+export const getBlogBySlug = async (slug: string) => {
+  try {
+    const blogsRef = collection(db, 'blogs');
+    const q = query(blogsRef, where('slug', '==', slug), limit(1));
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) return null;
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as BlogPost;
+  } catch (error) {
+    console.error('Error fetching blog by slug:', error);
+    return null;
+  }
+};
+
+export const addBlog = async (blogData: Omit<BlogPost, 'id'>) => {
+  try {
+    const blogsRef = collection(db, 'blogs');
+    const now = new Date().toISOString();
+    
+    let slug = blogData.slug;
+    const existing = await getBlogBySlug(slug);
+    if (existing) {
+      slug = `${slug}-${Date.now().toString().slice(-4)}`;
+    }
+
+    const docRef = await addDoc(blogsRef, {
+      ...blogData,
+      slug,
+      createdAt: now,
+      updatedAt: now
+    });
+    
+    return { success: true, id: docRef.id };
+  } catch (error: any) {
+    console.error("Error adding blog: ", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const updateBlog = async (id: string, blogData: Partial<BlogPost>) => {
+  try {
+    const docRef = doc(db, 'blogs', id);
+    const now = new Date().toISOString();
+    
+    await updateDoc(docRef, {
+      ...blogData,
+      updatedAt: now
+    });
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error updating blog: ", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const deleteBlog = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, 'blogs', id));
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error deleting blog: ", error);
+    return { success: false, error: error.message };
+  }
+};
+
+// --- Agent CRUD ---
+
+export const getAgents = async () => {
+  try {
+    const agentsRef = collection(db, 'agents');
+    const q = query(agentsRef, orderBy('order', 'asc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Agent));
+  } catch (error) {
+    console.error('Error fetching agents:', error);
+    return [];
+  }
+};
+
+export const getAgentById = async (id: string) => {
+  try {
+    const docRef = doc(db, 'agents', id);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Agent : null;
+  } catch (error) {
+    console.error('Error fetching agent:', error);
+    return null;
+  }
+};
+
+export const addAgent = async (agentData: Omit<Agent, 'id' | 'order'>) => {
+  try {
+    const agentsRef = collection(db, 'agents');
+    const now = new Date().toISOString();
+    const snapshot = await getDocs(agentsRef);
+    const order = snapshot.size;
+
+    const docRef = await addDoc(agentsRef, {
+      ...agentData,
+      order,
+      createdAt: now,
+      updatedAt: now
+    });
+    
+    return { success: true, id: docRef.id };
+  } catch (error: any) {
+    console.error("Error adding agent: ", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const updateAgent = async (id: string, agentData: Partial<Agent>) => {
+  try {
+    const docRef = doc(db, 'agents', id);
+    const now = new Date().toISOString();
+    await updateDoc(docRef, { ...agentData, updatedAt: now });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const deleteAgent = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, 'agents', id));
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const updateAgentOrder = async (agents: Agent[]) => {
+  try {
+    const batch = writeBatch(db);
+    agents.forEach((agent, index) => {
+      const docRef = doc(db, 'agents', agent.id);
+      batch.update(docRef, { order: index });
+    });
+    await batch.commit();
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+// --- Testimonials CRUD ---
+
+export const getTestimonials = async () => {
+  try {
+    const testimonialsRef = collection(db, 'testimonials');
+    const q = query(testimonialsRef, orderBy('order', 'asc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Testimonial));
+  } catch (error) {
+    console.error('Error fetching testimonials:', error);
+    return [];
+  }
+};
+
+export const addTestimonial = async (data: Omit<Testimonial, 'id' | 'order'>) => {
+  try {
+    const ref = collection(db, 'testimonials');
+    const now = new Date().toISOString();
+    const snapshot = await getDocs(ref);
+    const order = snapshot.size;
+
+    const docRef = await addDoc(ref, {
+      ...data,
+      order,
+      createdAt: now,
+      updatedAt: now
+    });
+    return { success: true, id: docRef.id };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const updateTestimonial = async (id: string, data: Partial<Testimonial>) => {
+  try {
+    const docRef = doc(db, 'testimonials', id);
+    await updateDoc(docRef, { ...data, updatedAt: new Date().toISOString() });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const deleteTestimonial = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, 'testimonials', id));
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+export const updateTestimonialOrder = async (testimonials: Testimonial[]) => {
+  try {
+    const batch = writeBatch(db);
+    testimonials.forEach((item, index) => {
+      const docRef = doc(db, 'testimonials', item.id);
+      batch.update(docRef, { order: index });
+    });
+    await batch.commit();
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+// --- Client Management ---
+
+export const getAllUsers = async () => {
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as UserProfile));
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
+};
+
+export const deleteUserAccount = async (uid: string) => {
+  try {
+    await deleteDoc(doc(db, 'users', uid));
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+};
+
+// --- User Saved Properties ---
+
 export const saveProperty = async (userId: string, propertyId: string) => {
   try {
     const userRef = doc(db, 'users', userId);
@@ -81,66 +416,9 @@ export const getSavedProperties = async (userId: string) => {
       savedIds.map((id: string) => getPropertyById(id))
     );
     
-    return properties.filter(p => p !== null);
+    return properties.filter(p => p !== null) as Property[];
   } catch (error) {
     console.error('Error fetching saved properties:', error);
-    return [];
-  }
-};
-
-// Blogs
-export const getBlogs = async (published = true) => {
-  try {
-    const blogsRef = collection(db, 'blogs');
-    const q = published 
-      ? query(blogsRef, where('published', '==', true), orderBy('createdAt', 'desc'))
-      : query(blogsRef, orderBy('createdAt', 'desc'));
-    
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error('Error fetching blogs:', error);
-    return [];
-  }
-};
-
-export const getBlogBySlug = async (slug: string) => {
-  try {
-    const blogsRef = collection(db, 'blogs');
-    const q = query(blogsRef, where('slug', '==', slug), limit(1));
-    const snapshot = await getDocs(q);
-    
-    if (snapshot.empty) return null;
-    const doc = snapshot.docs[0];
-    return { id: doc.id, ...doc.data() };
-  } catch (error) {
-    console.error('Error fetching blog:', error);
-    return null;
-  }
-};
-
-// Agents
-export const getAgents = async () => {
-  try {
-    const agentsRef = collection(db, 'agents');
-    const q = query(agentsRef, orderBy('order', 'asc'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error('Error fetching agents:', error);
-    return [];
-  }
-};
-
-// Testimonials
-export const getTestimonials = async () => {
-  try {
-    const testimonialsRef = collection(db, 'testimonials');
-    const q = query(testimonialsRef, orderBy('order', 'asc'));
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error('Error fetching testimonials:', error);
     return [];
   }
 };

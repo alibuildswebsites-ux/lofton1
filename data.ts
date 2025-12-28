@@ -4,15 +4,17 @@ import { Property, LocationArea, Stat, Testimonial } from './types';
 export const PROPERTIES: Property[] = [
   {
     id: '1',
-    price: '$450,000',
+    title: 'Modern Oak Forest Home',
+    price: 450000,
     address: '123 Oak Street',
     location: 'Houston, TX',
+    street: '123 Oak Street',
     city: 'Houston',
     state: 'TX',
     zip: '77002',
     beds: 3,
     baths: 2,
-    sqft: '2,100',
+    sqft: 2100,
     lotSize: '0.25 acres',
     yearBuilt: 2019,
     mlsId: 'LR-249102',
@@ -23,7 +25,7 @@ export const PROPERTIES: Property[] = [
       'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?auto=format&fit=crop&w=1200&q=80'
     ],
     status: 'New Listing',
-    type: 'buy',
+    type: 'House',
     description: "Welcome to this stunning contemporary home located in the heart of Houston's vibrant Oak Forest neighborhood. This meticulously maintained property offers the perfect blend of modern luxury and comfortable living, featuring high ceilings, abundant natural light, and premium finishes throughout.\n\nThe open-concept living area flows seamlessly into a chef's kitchen, equipped with quartz countertops, a large island, and top-of-the-line stainless steel appliances. The primary suite is a true retreat, boasting a spa-like bathroom with a soaking tub and a spacious walk-in closet. Outside, enjoy a beautifully landscaped backyard with a covered patio, perfect for entertaining guests or relaxing after a long day.\n\nConveniently situated near major highways, top-rated schools, and Houston's best dining and shopping destinations, this home provides an unparalleled lifestyle opportunity. Don't miss your chance to own a piece of modern elegance in one of the city's most sought-after communities.",
     features: [
       'Open-concept living and dining',
@@ -34,19 +36,23 @@ export const PROPERTIES: Property[] = [
       'Energy-efficient windows',
       'Two-car attached garage',
       'Smart home technology ready'
-    ]
+    ],
+    tags: ['New Listing'],
+    videos: []
   },
   {
     id: '2',
-    price: '$625,000',
+    title: 'Beachfront Bungalow',
+    price: 625000,
     address: '456 Beach Boulevard',
     location: 'Galveston, TX',
+    street: '456 Beach Boulevard',
     city: 'Galveston',
     state: 'TX',
     zip: '77550',
     beds: 2,
     baths: 2,
-    sqft: '1,800',
+    sqft: 1800,
     lotSize: '0.18 acres',
     yearBuilt: 2015,
     mlsId: 'LR-882109',
@@ -56,7 +62,7 @@ export const PROPERTIES: Property[] = [
       'https://images.unsplash.com/photo-1613553507747-5f8d62ad5904?auto=format&fit=crop&w=1200&q=80'
     ],
     status: 'Pending',
-    type: 'buy',
+    type: 'House',
     description: "Experience the ultimate coastal lifestyle in this charming beachfront bungalow in Galveston, Texas. Just steps away from the sand and surf, this property offers breathtaking Gulf views and a relaxed atmosphere that feels like a permanent vacation.\n\nThe interior features durable wood-look tile flooring, a bright and airy color palette, and large windows that frame the ocean scenery. The kitchen is designed for efficiency and style, while the spacious deck provides ample room for sunbathing or alfresco dining. Whether you're looking for a full-time residence or a lucrative short-term rental investment, this home delivers on all fronts.\n\nLocated near the historic Strand district and popular local attractions, 456 Beach Boulevard combines privacy with accessibility. Wake up to the sound of waves and enjoy the best of island living in a home built to withstand the elements while providing maximum comfort.",
     features: [
       'Direct beach access',
@@ -67,19 +73,23 @@ export const PROPERTIES: Property[] = [
       'Updated HVAC system',
       'Short-term rental potential',
       'Close to The Strand'
-    ]
+    ],
+    tags: [],
+    videos: []
   },
   {
     id: '3',
-    price: '$550,000',
+    title: 'Modern Farmhouse',
+    price: 550000,
     address: '789 Sunset Drive',
     location: 'Austin, TX',
+    street: '789 Sunset Drive',
     city: 'Austin',
     state: 'TX',
     zip: '78704',
     beds: 4,
     baths: 3,
-    sqft: '2,500',
+    sqft: 2500,
     lotSize: '0.30 acres',
     yearBuilt: 2021,
     mlsId: 'LR-334910',
@@ -89,7 +99,7 @@ export const PROPERTIES: Property[] = [
       'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80'
     ],
     status: 'Price Drop',
-    type: 'buy',
+    type: 'House',
     description: "Nestled in the rolling hills of Austin, this modern farmhouse offers a serene escape without sacrificing city convenience. 789 Sunset Drive is a masterpiece of design, featuring board-and-batten siding, metal roof accents, and a sprawling front porch that welcomes you home.\n\nInside, you'll find an expansive floor plan with vaulted ceilings and exposed beams. The gourmet kitchen boasts a farmhouse sink, custom cabinetry, and a walk-in pantry. The master suite is located on the main floor for privacy, offering a luxurious bath and direct access to the back patio. The backyard is an oasis with mature oak trees and plenty of room for a pool.\n\nJust minutes from downtown Austin's tech corridor and famous live music venues, this property offers the best of both worlds. Enjoy the tranquility of hill country living with easy access to the vibrant culture that makes Austin unique.",
     features: [
       'Modern farmhouse design',
@@ -100,19 +110,23 @@ export const PROPERTIES: Property[] = [
       'Smart thermostat & doorbell',
       'Mature oak trees',
       'Room for a pool'
-    ]
+    ],
+    tags: [],
+    videos: []
   },
   {
     id: '4',
-    price: '$3,200/mo',
+    title: 'Downtown Loft',
+    price: 3200,
     address: '101 Downtown Lofts',
     location: 'Houston, TX',
+    street: '101 Downtown Lofts',
     city: 'Houston',
     state: 'TX',
     zip: '77002',
     beds: 1,
     baths: 1,
-    sqft: '900',
+    sqft: 900,
     lotSize: 'N/A',
     yearBuilt: 2018,
     mlsId: 'LR-RENT-001',
@@ -122,7 +136,7 @@ export const PROPERTIES: Property[] = [
       'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80'
     ],
     status: 'New Listing',
-    type: 'rent',
+    type: 'Apartment',
     description: "Discover urban living at its finest in this chic loft apartment located in the heart of Downtown Houston. With floor-to-ceiling windows, polished concrete floors, and exposed ductwork, this unit exudes industrial elegance and modern sophistication.\n\nThe open layout maximizes space, providing a versatile living area that can easily accommodate a home office. The kitchen features sleek European-style cabinetry and integrated appliances. Residents enjoy access to premium building amenities, including a rooftop infinity pool, 24-hour fitness center, and concierge services.\n\nWalk to work or explore the nearby theater district, sports arenas, and award-winning restaurants. This is perfect for professionals seeking a high-energy lifestyle with luxury conveniences right at their doorstep.",
     features: [
       'Floor-to-ceiling windows',
@@ -133,46 +147,54 @@ export const PROPERTIES: Property[] = [
       'Concierge service',
       'Secure garage parking',
       'Pet-friendly building'
-    ]
+    ],
+    tags: ['New Listing'],
+    videos: []
   }
 ];
 
 export const TESTIMONIALS: Testimonial[] = [
   {
-    id: 1,
+    id: '1',
     quote: "The Lofton team turned our vague idea of a 'dream home' into reality. Their patience, market insight, and ability to listen were unmatched throughout the process.",
     author: "Elena Rodriguez",
-    role: "First-time Buyer"
+    role: "First-time Buyer",
+    order: 1
   },
   {
-    id: 2,
+    id: '2',
     quote: "We needed to sell quickly due to a job relocation. They handled everything efficiently, from staging to closing, and we got an offer above asking in just 4 days.",
     author: "Marcus Chen",
-    role: "Seller, Downtown Loft"
+    role: "Seller, Downtown Loft",
+    order: 2
   },
   {
-    id: 3,
+    id: '3',
     quote: "Their investment advice is gold. We've built a robust rental portfolio in Austin thanks to their strategic guidance and deep understanding of emerging markets.",
     author: "The Thompson Family",
-    role: "Property Investors"
+    role: "Property Investors",
+    order: 3
   },
   {
-    id: 4,
+    id: '4',
     quote: "Professionalism at its finest. They navigated a complex closing with ease and kept us informed every single step of the way.",
     author: "Sarah Jenkins",
-    role: "Luxury Home Buyer"
+    role: "Luxury Home Buyer",
+    order: 4
   },
   {
-    id: 5,
+    id: '5',
     quote: "Lofton Realty's marketing strategy is next level. Our home went viral and sold for significantly over asking price.",
     author: "Michael Ross",
-    role: "Seller, The Heights"
+    role: "Seller, The Heights",
+    order: 5
   },
   {
-    id: 6,
+    id: '6',
     quote: "Moving from out of state was stressful, but their team handled the logistics perfectly. We found our dream home in one weekend.",
     author: "The Davis Family",
-    role: "Relocation Clients"
+    role: "Relocation Clients",
+    order: 6
   }
 ];
 

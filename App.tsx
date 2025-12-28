@@ -10,6 +10,10 @@ import { PropertyListings } from './components/PropertyListings';
 
 // Lazy load other secondary pages
 const PropertyDetailPage = lazy(() => import('./components/PropertyDetailPage').then(module => ({ default: module.PropertyDetailPage })));
+const BlogList = lazy(() => import('./components/blog/BlogList').then(module => ({ default: module.BlogList })));
+const BlogPost = lazy(() => import('./components/blog/BlogPost').then(module => ({ default: module.BlogPost })));
+const AgentList = lazy(() => import('./components/agents/AgentList').then(module => ({ default: module.AgentList })));
+const AgentProfile = lazy(() => import('./components/agents/AgentProfile').then(module => ({ default: module.AgentProfile })));
 const BuyerGuide = lazy(() => import('./components/BuyerGuide').then(module => ({ default: module.BuyerGuide })));
 const SellerGuide = lazy(() => import('./components/SellerGuide').then(module => ({ default: module.SellerGuide })));
 const ContactPage = lazy(() => import('./components/ContactPage').then(module => ({ default: module.ContactPage })));
@@ -26,6 +30,9 @@ const DashboardLayout = lazy(() => import('./components/dashboard/DashboardLayou
 const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'));
 const ProfileSettings = lazy(() => import('./components/dashboard/ProfileSettings'));
 const SavedProperties = lazy(() => import('./components/dashboard/SavedProperties'));
+
+// Admin Components
+const AdminDashboard = lazy(() => import('./components/admin/AdminDashboard').then(module => ({ default: module.AdminDashboard })));
 
 // Global Loading Spinner for Route Transitions (still used for secondary lazy routes)
 const PageLoader = () => (
@@ -44,6 +51,10 @@ function App() {
           <Route path="/" element={<LoftonRealtyHome />} />
           <Route path="/property-listings" element={<PropertyListings />} />
           <Route path="/property-listings/:id" element={<PropertyDetailPage />} />
+          <Route path="/blog" element={<BlogList />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/agents" element={<AgentList />} />
+          <Route path="/agents/:id" element={<AgentProfile />} />
           <Route path="/buyers-guide" element={<BuyerGuide />} />
           <Route path="/sellers-guide" element={<SellerGuide />} />
           <Route path="/contact-us" element={<ContactPage />} />
@@ -66,6 +77,8 @@ function App() {
             <Route index element={<DashboardHome />} />
             <Route path="profile" element={<ProfileSettings />} />
             <Route path="saved" element={<SavedProperties />} />
+            {/* Added Admin Route under Dashboard for simplicity in this demo */}
+            <Route path="admin" element={<AdminDashboard />} />
           </Route>
           
           <Route path="*" element={<NotFound />} />

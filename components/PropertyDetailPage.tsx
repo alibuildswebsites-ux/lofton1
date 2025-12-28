@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { PROPERTIES } from '../data';
+import { getPropertyById, incrementPropertyView, getProperties } from '../lib/firebase/firestore';
+import { Property } from '../types';
 import { PropertyCard } from './PropertyCard';
 import { 
   MapPin, Bed, Bath, Maximize, Calendar, Ruler, Phone, Mail, 
-  ChevronLeft, ChevronRight, CheckCircle2, ArrowRight, Home, Building, ImageOff
+  ChevronLeft, ChevronRight, CheckCircle2, ArrowRight, Home, Building, ImageOff, Loader2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getOptimizedImageUrl, updateSEO, injectJSONLD } from '../utils';
@@ -14,78 +15,95 @@ import { getOptimizedImageUrl, updateSEO, injectJSONLD } from '../utils';
 export const PropertyDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [property, setProperty] = useState<Property | null>(null);
+  const [similarProperties, setSimilarProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [imageError, setImageError] = useState(false);
   const [mainImageLoaded, setMainImageLoaded] = useState(false);
 
-  // Find Property
-  const property = PROPERTIES.find(p => p.id === id);
-
-  // SEO & Scroll handling
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const fetchData = async () => {
+      setLoading(true);
+      if (id) {
+        // Fetch property
+        const data = await getPropertyById(id);
+        if (data) {
+          setProperty(data);
+          incrementPropertyView(id); // Increment view count
 
-    if (property) {
-      // Dynamic Meta Tags
-      updateSEO({
-        title: `${property.address} | Homes for Sale in ${property.city}, ${property.state}`,
-        description: `View details for ${property.address}. ${property.beds} Bed, ${property.baths} Bath, ${property.price}. ${property.description?.substring(0, 120)}...`,
-        image: property.images[0],
-        url: `https://loftonrealty.com/properties/${property.id}`,
-        type: 'article'
-      });
+          // Fetch similar
+          const allProps = await getProperties();
+          const similar = allProps
+            .filter(p => p.location === data.location && p.id !== data.id)
+            .slice(0, 3);
+          
+          if (similar.length < 3) {
+            const others = allProps.filter(p => p.id !== data.id && !similar.find(s => s.id === p.id)).slice(0, 3 - similar.length);
+            similar.push(...others);
+          }
+          setSimilarProperties(similar);
 
-      // Structured Data (Schema.org)
-      injectJSONLD({
-        "@context": "https://schema.org",
-        "@type": "SingleFamilyResidence",
-        "name": property.address,
-        "description": property.description,
-        "numberOfRooms": property.beds + property.baths, // Approximate
-        "occupancy": {
-          "@type": "QuantitativeValue",
-          "value": property.beds
-        },
-        "floorSize": {
-          "@type": "QuantitativeValue",
-          "value": property.sqft.replace(/,/g, ''),
-          "unitCode": "FTK"
-        },
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": property.address,
-          "addressLocality": property.city,
-          "addressRegion": property.state,
-          "postalCode": property.zip,
-          "addressCountry": "US"
-        },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": "29.7604", // Placeholder for demo
-          "longitude": "-95.3698"
-        },
-        "image": property.images,
-        "offers": {
-          "@type": "Offer",
-          "price": property.price.replace(/[^0-9.]/g, ''),
-          "priceCurrency": "USD",
-          "availability": property.status === 'Pending' ? "https://schema.org/Sold" : "https://schema.org/InStock"
+          // SEO
+          updateSEO({
+            title: `${data.address} | Homes for Sale in ${data.city}, ${data.state}`,
+            description: `View details for ${data.address}. ${data.beds} Bed, ${data.baths} Bath, $${data.price.toLocaleString()}. ${data.description?.substring(0, 120)}...`,
+            image: data.images[0],
+            url: `https://loftonrealty.com/properties/${data.id}`,
+            type: 'article'
+          });
+
+          // JSON-LD
+          injectJSONLD({
+            "@context": "https://schema.org",
+            "@type": "SingleFamilyResidence",
+            "name": data.address,
+            "description": data.description,
+            "numberOfRooms": data.beds + data.baths, 
+            "occupancy": { "@type": "QuantitativeValue", "value": data.beds },
+            "floorSize": { "@type": "QuantitativeValue", "value": data.sqft.toString(), "unitCode": "FTK" },
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": data.address,
+              "addressLocality": data.city,
+              "addressRegion": data.state,
+              "postalCode": data.zip,
+              "addressCountry": "US"
+            },
+            "image": data.images,
+            "offers": {
+              "@type": "Offer",
+              "price": data.price.toString(),
+              "priceCurrency": "USD",
+              "availability": data.status === 'Pending' ? "https://schema.org/Sold" : "https://schema.org/InStock"
+            }
+          });
         }
-      });
-    }
-  }, [property, id]);
+      }
+      setLoading(false);
+    };
 
-  // Reset active image when property changes
+    fetchData();
+    window.scrollTo(0, 0);
+  }, [id]);
+
   useEffect(() => {
       setActiveImage(0);
       setImageError(false);
       setMainImageLoaded(false);
   }, [id]);
 
-  // Reset loading state when active image changes
   useEffect(() => {
     setMainImageLoaded(false);
   }, [activeImage]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <Loader2 className="animate-spin text-brand" size={40} />
+      </div>
+    );
+  }
 
   if (!property) {
     return (
@@ -94,24 +112,13 @@ export const PropertyDetailPage = () => {
         <div className="text-center p-8">
           <h2 className="text-3xl font-bold text-charcoal mb-4">Property Not Found</h2>
           <p className="text-gray-500 mb-8">The listing you are looking for may have been removed or does not exist.</p>
-          <Link to="/properties" className="bg-brand text-white px-6 py-3 rounded-full font-bold hover:bg-brand-dark transition-colors">
+          <Link to="/property-listings" className="bg-brand text-white px-6 py-3 rounded-full font-bold hover:bg-brand-dark transition-colors">
             Return to Properties
           </Link>
         </div>
         <Footer />
       </div>
     );
-  }
-
-  // Similar Properties Logic
-  const similarProperties = PROPERTIES
-    .filter(p => p.location === property.location && p.id !== property.id)
-    .slice(0, 3);
-  
-  // Fill with others if not enough similar found in same location
-  if (similarProperties.length < 3) {
-    const others = PROPERTIES.filter(p => p.id !== property.id && !similarProperties.includes(p)).slice(0, 3 - similarProperties.length);
-    similarProperties.push(...others);
   }
 
   const handleNextImage = () => {
@@ -133,9 +140,9 @@ export const PropertyDetailPage = () => {
         <div className="max-w-[1280px] mx-auto px-5 md:px-10 flex items-center gap-2 text-sm text-gray-500 overflow-x-auto whitespace-nowrap">
           <Link to="/" className="hover:text-brand transition-colors">Home</Link>
           <span className="text-gray-300">/</span>
-          <Link to="/properties" className="hover:text-brand transition-colors">Properties</Link>
+          <Link to="/property-listings" className="hover:text-brand transition-colors">Properties</Link>
           <span className="text-gray-300">/</span>
-          <Link to={`/properties?location=${encodeURIComponent(property.location)}`} className="hover:text-brand transition-colors">{property.city}</Link>
+          <span className="hover:text-brand transition-colors cursor-pointer">{property.city}</span>
           <span className="text-gray-300">/</span>
           <span className="font-semibold text-charcoal truncate">{property.address}</span>
         </div>
@@ -155,7 +162,7 @@ export const PropertyDetailPage = () => {
             </div>
           </div>
           <div className="flex flex-col items-start md:items-end">
-             <div className="text-3xl md:text-4xl font-extrabold text-brand mb-2">{property.price}</div>
+             <div className="text-3xl md:text-4xl font-extrabold text-brand mb-2">${property.price.toLocaleString()}</div>
              <span className={`px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wide text-white ${
                 property.status === 'New Listing' ? 'bg-blue-600' :
                 property.status === 'Pending' ? 'bg-orange-500' :
@@ -171,7 +178,6 @@ export const PropertyDetailPage = () => {
           {/* Main Image */}
           <div className="relative rounded-2xl overflow-hidden bg-gray-100 h-full group">
              
-             {/* Skeleton Placeholder */}
              {!mainImageLoaded && !imageError && (
                <div className="absolute inset-0 bg-gray-200 animate-pulse z-10" />
              )}
@@ -230,7 +236,7 @@ export const PropertyDetailPage = () => {
                   alt={`Property at ${property.address} - View ${idx + 1}`} 
                   className="w-full h-full object-cover" 
                   loading="lazy"
-                  onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement?.classList.add('flex', 'items-center', 'justify-center'); e.currentTarget.parentElement!.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>'; }}
+                  onError={(e) => { e.currentTarget.style.display='none'; }}
                 />
                 {idx === 2 && property.images.length > 3 && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold text-xl">
@@ -242,12 +248,12 @@ export const PropertyDetailPage = () => {
           </div>
         </div>
 
-        {/* Main Content Layout */}
+        {/* Content Layout */}
         <div className="grid lg:grid-cols-[2fr_1fr] gap-12">
           
-          {/* Left Column: Details */}
+          {/* Details */}
           <div>
-            {/* Quick Facts Grid */}
+            {/* Quick Facts */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 bg-white p-8 rounded-2xl border border-gray-100 shadow-sm">
                <div className="flex flex-col gap-1">
                  <span className="flex items-center gap-2 text-gray-400 text-sm font-bold uppercase tracking-wide"><Bed size={16} /> Bedrooms</span>
@@ -259,19 +265,11 @@ export const PropertyDetailPage = () => {
                </div>
                <div className="flex flex-col gap-1">
                  <span className="flex items-center gap-2 text-gray-400 text-sm font-bold uppercase tracking-wide"><Maximize size={16} /> Sq Ft</span>
-                 <span className="text-2xl font-bold text-charcoal">{property.sqft}</span>
+                 <span className="text-2xl font-bold text-charcoal">{property.sqft.toLocaleString()}</span>
                </div>
                <div className="flex flex-col gap-1">
                  <span className="flex items-center gap-2 text-gray-400 text-sm font-bold uppercase tracking-wide"><Calendar size={16} /> Year Built</span>
                  <span className="text-2xl font-bold text-charcoal">{property.yearBuilt || 'N/A'}</span>
-               </div>
-               <div className="flex flex-col gap-1 md:hidden">
-                 <span className="flex items-center gap-2 text-gray-400 text-sm font-bold uppercase tracking-wide"><Ruler size={16} /> Lot Size</span>
-                 <span className="text-xl font-bold text-charcoal">{property.lotSize || 'N/A'}</span>
-               </div>
-               <div className="flex flex-col gap-1 md:hidden">
-                 <span className="flex items-center gap-2 text-gray-400 text-sm font-bold uppercase tracking-wide"><Home size={16} /> Type</span>
-                 <span className="text-xl font-bold text-charcoal capitalize">{property.type}</span>
                </div>
             </div>
 
@@ -283,7 +281,7 @@ export const PropertyDetailPage = () => {
               </div>
             </div>
 
-            {/* Key Features */}
+            {/* Features */}
             <div className="mb-12">
                <h2 className="text-2xl font-bold text-charcoal mb-6">Key Features & Amenities</h2>
                <div className="grid md:grid-cols-2 gap-4">
@@ -295,37 +293,12 @@ export const PropertyDetailPage = () => {
                  ))}
                </div>
             </div>
-
-            {/* Additional Facts (Desktop Only for some) */}
-            <div className="mb-12 bg-gray-100 rounded-2xl p-8 hidden md:block">
-               <h3 className="font-bold text-charcoal mb-6">Additional Details</h3>
-               <div className="grid grid-cols-2 gap-y-4 text-sm">
-                 <div className="flex justify-between border-b border-gray-200 pb-2 mr-8">
-                   <span className="text-gray-500">Property Type</span>
-                   <span className="font-semibold capitalize">{property.type}</span>
-                 </div>
-                 <div className="flex justify-between border-b border-gray-200 pb-2 mr-8">
-                   <span className="text-gray-500">MLS Number</span>
-                   <span className="font-semibold">{property.mlsId || 'N/A'}</span>
-                 </div>
-                 <div className="flex justify-between border-b border-gray-200 pb-2 mr-8">
-                   <span className="text-gray-500">Lot Size</span>
-                   <span className="font-semibold">{property.lotSize || 'N/A'}</span>
-                 </div>
-                 <div className="flex justify-between border-b border-gray-200 pb-2 mr-8">
-                   <span className="text-gray-500">Parking</span>
-                   <span className="font-semibold">Garage (2)</span>
-                 </div>
-               </div>
-            </div>
-
           </div>
 
-          {/* Right Column: Agent Contact */}
+          {/* Agent Contact */}
           <div className="relative">
              <div className="sticky top-28 space-y-8">
                 
-                {/* Agent Card */}
                 <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
                    <div className="flex items-center gap-4 mb-6">
                      <div className="w-16 h-16 rounded-full bg-gray-100 overflow-hidden border-2 border-brand">
@@ -333,7 +306,6 @@ export const PropertyDetailPage = () => {
                           src={getOptimizedImageUrl('https://images.unsplash.com/photo-1560250097-0b93528c311a', 200)} 
                           alt="Agent" 
                           className="w-full h-full object-cover"
-                          onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Jared+Lofton&background=4ADE80&color=fff"; }}
                         />
                      </div>
                      <div>
@@ -351,16 +323,12 @@ export const PropertyDetailPage = () => {
                      <a href="tel:7132037661" className="flex items-center justify-center gap-2 w-full bg-brand text-white py-3 rounded-lg font-bold hover:bg-brand-dark transition-colors shadow-lg shadow-brand/20">
                        <Phone size={18} /> Call Agent
                      </a>
-                     <a href="mailto:Info@LoftonRealty.com" className="flex items-center justify-center gap-2 w-full bg-white border-2 border-charcoal text-charcoal py-3 rounded-lg font-bold hover:bg-gray-50 transition-colors">
-                       <Mail size={18} /> Email Agent
-                     </a>
-                     <Link to="/contact" className="flex items-center justify-center gap-2 w-full bg-gray-100 text-charcoal py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors">
-                       <Calendar size={18} /> Schedule Tour
+                     <Link to="/contact-us" className="flex items-center justify-center gap-2 w-full bg-white border-2 border-charcoal text-charcoal py-3 rounded-lg font-bold hover:bg-gray-50 transition-colors">
+                       <Mail size={18} /> Message Agent
                      </Link>
                    </div>
                 </div>
 
-                {/* Safety/Trust Badge */}
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex items-start gap-3">
                    <Building size={20} className="text-gray-400 mt-1" />
                    <div>
@@ -384,22 +352,6 @@ export const PropertyDetailPage = () => {
                  <PropertyCard key={prop.id} property={prop} />
                ))}
             </div>
-         </div>
-      </section>
-
-      {/* Bottom CTA */}
-      <section className="py-20 bg-charcoal-dark text-center">
-         <div className="max-w-3xl mx-auto px-5">
-           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-6">See It For Yourself</h2>
-           <p className="text-xl text-gray-400 mb-8">
-             Pictures can only say so much. Schedule a private tour of {property.address} today.
-           </p>
-           <Link 
-             to="/contact" 
-             className="inline-flex items-center gap-2 bg-brand text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-brand-dark transition-colors shadow-lg shadow-brand/20"
-           >
-             Schedule a Tour Today <ArrowRight size={20} />
-           </Link>
          </div>
       </section>
 
