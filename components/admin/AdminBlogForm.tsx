@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { BlogPost } from '../../types';
-import { X, Upload, Save, Loader2, Image as ImageIcon, Eye, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { X, Upload, Save, Loader2, Image as ImageIcon, Eye, ArrowLeft, Bold, Italic, Strikethrough, Heading1, Heading2, List, ListOrdered, Quote, Undo, Redo, Code } from 'lucide-react';
 import { addBlog, updateBlog, uploadFiles } from '../../lib/firebase/firestore';
 import { useAuth } from '../../hooks/useAuth';
 import { sanitizeHtml } from '../../lib/sanitizeHtml';
+import { useEditor, EditorContent, Editor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 
 interface AdminBlogFormProps {
   initialData?: BlogPost;
@@ -20,6 +22,112 @@ const CATEGORIES = [
   'Home Improvement',
   'Real Estate News'
 ];
+
+// --- TipTap Toolbar Component ---
+const MenuBar = ({ editor }: { editor: Editor | null }) => {
+  if (!editor) {
+    return null;
+  }
+
+  const buttons = [
+    {
+      icon: Bold,
+      title: 'Bold',
+      action: () => editor.chain().focus().toggleBold().run(),
+      isActive: editor.isActive('bold'),
+    },
+    {
+      icon: Italic,
+      title: 'Italic',
+      action: () => editor.chain().focus().toggleItalic().run(),
+      isActive: editor.isActive('italic'),
+    },
+    {
+      icon: Strikethrough,
+      title: 'Strike',
+      action: () => editor.chain().focus().toggleStrike().run(),
+      isActive: editor.isActive('strike'),
+    },
+    {
+      icon: Code,
+      title: 'Code',
+      action: () => editor.chain().focus().toggleCode().run(),
+      isActive: editor.isActive('code'),
+    },
+    { type: 'divider' },
+    {
+      icon: Heading1,
+      title: 'H2',
+      action: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
+      isActive: editor.isActive('heading', { level: 2 }),
+    },
+    {
+      icon: Heading2,
+      title: 'H3',
+      action: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
+      isActive: editor.isActive('heading', { level: 3 }),
+    },
+    { type: 'divider' },
+    {
+      icon: List,
+      title: 'Bullet List',
+      action: () => editor.chain().focus().toggleBulletList().run(),
+      isActive: editor.isActive('bulletList'),
+    },
+    {
+      icon: ListOrdered,
+      title: 'Ordered List',
+      action: () => editor.chain().focus().toggleOrderedList().run(),
+      isActive: editor.isActive('orderedList'),
+    },
+    {
+      icon: Quote,
+      title: 'Blockquote',
+      action: () => editor.chain().focus().toggleBlockquote().run(),
+      isActive: editor.isActive('blockquote'),
+    },
+    { type: 'divider' },
+    {
+      icon: Undo,
+      title: 'Undo',
+      action: () => editor.chain().focus().undo().run(),
+      isActive: false,
+      disabled: !editor.can().undo(),
+    },
+    {
+      icon: Redo,
+      title: 'Redo',
+      action: () => editor.chain().focus().redo().run(),
+      isActive: false,
+      disabled: !editor.can().redo(),
+    },
+  ];
+
+  return (
+    <div className="flex flex-wrap items-center gap-1 p-2 border-b border-gray-200 bg-gray-50/50 sticky top-0 z-10">
+      {buttons.map((btn, index) => (
+        btn.type === 'divider' ? (
+          <div key={index} className="w-[1px] h-6 bg-gray-300 mx-2" />
+        ) : (
+          <button
+            key={index}
+            onClick={(e) => { e.preventDefault(); btn.action && btn.action(); }}
+            disabled={btn.disabled}
+            className={`p-2 rounded-lg transition-all ${
+              btn.isActive 
+                ? 'bg-brand text-white shadow-sm' 
+                : 'text-gray-600 hover:bg-gray-200 hover:text-charcoal'
+            } ${btn.disabled ? 'opacity-30 cursor-not-allowed' : ''}`}
+            title={btn.title}
+            type="button"
+          >
+            {btn.icon && <btn.icon size={18} />}
+          </button>
+        )
+      ))}
+    </div>
+  );
+};
 
 export const AdminBlogForm: React.FC<AdminBlogFormProps> = ({ initialData, onSuccess, onCancel }) => {
   const { user } = useAuth();
@@ -42,13 +150,31 @@ export const AdminBlogForm: React.FC<AdminBlogFormProps> = ({ initialData, onSuc
   const [uploadingImage, setUploadingImage] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
 
+  // Initialize TipTap
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: formData.content,
+    editorProps: {
+      attributes: {
+        class: 'prose prose-lg max-w-none focus:outline-none min-h-[300px] p-4 text-gray-700 leading-relaxed',
+      },
+    },
+    onUpdate: ({ editor }) => {
+      setFormData(prev => ({ ...prev, content: editor.getHTML() }));
+    },
+  });
+
+  // Sync initial data
   useEffect(() => {
     if (initialData) {
-      // Exclude id and timestamps from form state
       const { id, createdAt, updatedAt, ...rest } = initialData;
       setFormData(rest);
+      // Sync editor content only if it hasn't been touched or is different
+      if (editor && rest.content && editor.getHTML() !== rest.content) {
+        editor.commands.setContent(rest.content);
+      }
     }
-  }, [initialData]);
+  }, [initialData, editor]);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -64,10 +190,6 @@ export const AdminBlogForm: React.FC<AdminBlogFormProps> = ({ initialData, onSuc
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleContentChange = (value: string) => {
-    setFormData(prev => ({ ...prev, content: value }));
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,19 +303,10 @@ export const AdminBlogForm: React.FC<AdminBlogFormProps> = ({ initialData, onSuc
           </div>
 
           <div>
-             <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-bold text-gray-700">Content (HTML or Plain Text)</label>
-                <div className="text-xs text-orange-600 flex items-center gap-1 font-medium bg-orange-50 px-2 py-1 rounded">
-                   <AlertTriangle size={12} /> Simple Text Editor
-                </div>
-             </div>
-             <div className="bg-white rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
-               <textarea 
-                 value={formData.content} 
-                 onChange={(e) => handleContentChange(e.target.value)}
-                 className="w-full h-96 p-4 border border-gray-200 rounded-xl focus:outline-none resize-y font-mono text-sm"
-                 placeholder="Write your article content here..."
-               />
+             <label className="block text-sm font-bold text-gray-700 mb-2">Content</label>
+             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent shadow-sm">
+               <MenuBar editor={editor} />
+               <EditorContent editor={editor} />
              </div>
           </div>
 
