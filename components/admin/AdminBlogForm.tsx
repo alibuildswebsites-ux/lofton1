@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { BlogPost } from '../../types';
 import { X, Upload, Save, Loader2, Image as ImageIcon, Eye, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { addBlog, updateBlog, uploadFiles } from '../../lib/firebase/firestore';
-import ReactQuill from 'react-quill';
 import { useAuth } from '../../hooks/useAuth';
 import { sanitizeHtml } from '../../lib/sanitizeHtml';
 
@@ -183,26 +182,17 @@ export const AdminBlogForm: React.FC<AdminBlogFormProps> = ({ initialData, onSuc
 
           <div>
              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-bold text-gray-700">Content</label>
+                <label className="block text-sm font-bold text-gray-700">Content (HTML or Plain Text)</label>
                 <div className="text-xs text-orange-600 flex items-center gap-1 font-medium bg-orange-50 px-2 py-1 rounded">
-                   <AlertTriangle size={12} /> External content is sanitized for security
+                   <AlertTriangle size={12} /> Simple Text Editor
                 </div>
              </div>
-             <div className="bg-white rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
-               <ReactQuill 
-                 theme="snow" 
+             <div className="bg-white rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-brand focus-within:border-transparent">
+               <textarea 
                  value={formData.content} 
-                 onChange={handleContentChange}
-                 className="h-96 mb-12"
-                 modules={{
-                   toolbar: [
-                     [{ 'header': [1, 2, 3, false] }],
-                     ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                     [{'list': 'ordered'}, {'list': 'bullet'}],
-                     ['link', 'image'],
-                     ['clean']
-                   ],
-                 }}
+                 onChange={(e) => handleContentChange(e.target.value)}
+                 className="w-full h-96 p-4 border border-gray-200 rounded-xl focus:outline-none resize-y font-mono text-sm"
+                 placeholder="Write your article content here..."
                />
              </div>
           </div>
