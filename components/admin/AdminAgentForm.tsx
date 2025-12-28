@@ -69,9 +69,9 @@ export const AdminAgentForm: React.FC<AdminAgentFormProps> = ({ initialData, onS
       try {
         const paths = await uploadFiles([file], 'agents');
         setFormData(prev => ({ ...prev, photo: paths[0] }));
-      } catch (error) {
+      } catch (error: any) {
         console.error("Image upload failed", error);
-        alert("Failed to upload image. Ensure local server is running.");
+        alert(`Failed to upload image: ${error.message}. Ensure Cloudinary is configured.`);
       } finally {
         setUploadingImage(false);
       }

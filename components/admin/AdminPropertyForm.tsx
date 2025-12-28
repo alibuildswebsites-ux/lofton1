@@ -40,7 +40,7 @@ export const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({ initialDat
   const [showPreview, setShowPreview] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   
-  // Create a pending ID for new properties to allow uploads before save
+  // Create a pending ID for new properties to allow uploads before save (used for folder org)
   const [pendingId] = useState(() => initialData?.id || doc(collection(db, 'properties')).id);
 
   useEffect(() => {
@@ -84,13 +84,13 @@ export const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({ initialDat
       setUploadingMedia(true);
       const files = Array.from(e.target.files) as File[];
       try {
-        // Upload using local server API
+        // Upload to Cloudinary
         // Store in a folder named after the property ID
         const uploadedPaths = await uploadFiles(files, `properties/${pendingId}`);
         setFormData(prev => ({ ...prev, images: [...prev.images, ...uploadedPaths] }));
-      } catch (error) {
+      } catch (error: any) {
         console.error("Image upload failed", error);
-        alert("Failed to upload images. Check that the local server is running.");
+        alert(`Failed to upload images: ${error.message || "Unknown error"}. Check Cloudinary config.`);
       } finally {
         setUploadingMedia(false);
       }
@@ -100,17 +100,17 @@ export const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({ initialDat
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      if (file.size > 50 * 1024 * 1024) { // 50MB check
-        alert("Video size must be less than 50MB");
+      if (file.size > 100 * 1024 * 1024) { // 100MB check
+        alert("Video size must be less than 100MB");
         return;
       }
       setUploadingMedia(true);
       try {
         const uploadedPaths = await uploadFiles([file], `properties/${pendingId}`);
         setFormData(prev => ({ ...prev, videos: [...prev.videos, ...uploadedPaths] }));
-      } catch (error) {
+      } catch (error: any) {
         console.error("Video upload failed", error);
-        alert("Failed to upload video.");
+        alert(`Failed to upload video: ${error.message}. Check Cloudinary config.`);
       } finally {
         setUploadingMedia(false);
       }
@@ -444,13 +444,13 @@ export const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({ initialDat
            </div>
 
            <div className="mt-4">
-             <label className="block text-sm font-semibold text-gray-700 mb-2">Videos (Max 50MB)</label>
+             <label className="block text-sm font-semibold text-gray-700 mb-2">Videos (Max 100MB)</label>
              <div className="flex items-center gap-4">
                <label className="cursor-pointer bg-white border border-gray-300 hover:bg-gray-50 text-charcoal px-4 py-2 rounded-lg font-medium inline-flex items-center gap-2">
                  <Video size={18} /> Add Video
                  <input type="file" accept="video/*" onChange={handleVideoUpload} className="hidden" />
                </label>
-               {uploadingMedia && <span className="text-sm text-gray-500 flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Processing...</span>}
+               {uploadingMedia && <span className="text-sm text-gray-500 flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Uploading to Cloudinary...</span>}
              </div>
              {formData.videos.length > 0 && (
                <div className="mt-2 space-y-2">

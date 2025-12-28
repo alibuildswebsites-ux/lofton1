@@ -19,37 +19,43 @@ import {
 import { db } from '../../firebase.config';
 import { Property, BlogPost, Agent, Testimonial, UserProfile } from '../../types';
 
-// --- File Upload Helper ---
+// --- File Upload Helper (Cloudinary) ---
 
 export const uploadFiles = async (files: File[], folderName: string): Promise<string[]> => {
-  const uploadedPaths: string[] = [];
-  const formData = new FormData();
-  
-  // Group files into formData
-  files.forEach(file => {
-    formData.append('files', file);
-  });
-  formData.append('folder', folderName);
+  // Hardcoded credentials as requested
+  const cloudName = 'dgqufb8sj';
+  const uploadPreset = 'lofton_unsigned';
 
-  try {
-    // Post to local server endpoint
-    const response = await fetch('/api/upload', {
+  const uploadPromises = files.map(async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+    if (folderName) {
+      formData.append('folder', `lofton-realty/${folderName}`);
+    }
+
+    // Determine resource type based on file MIME type
+    const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
+
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
       method: 'POST',
       body: formData,
     });
 
     if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`);
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || `Upload failed: ${response.statusText}`);
     }
 
     const data = await response.json();
-    if (data.success && Array.isArray(data.filePaths)) {
-      return data.filePaths;
-    } else {
-      throw new Error('Invalid response from upload server');
-    }
+    return data.secure_url;
+  });
+
+  try {
+    const uploadedUrls = await Promise.all(uploadPromises);
+    return uploadedUrls;
   } catch (error) {
-    console.error("File upload error:", error);
+    console.error("Cloudinary upload error:", error);
     throw error;
   }
 };

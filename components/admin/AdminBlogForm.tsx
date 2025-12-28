@@ -197,12 +197,12 @@ export const AdminBlogForm: React.FC<AdminBlogFormProps> = ({ initialData, onSuc
       setUploadingImage(true);
       try {
         const file = e.target.files[0];
-        // Use local API upload
+        // Use Cloudinary upload
         const paths = await uploadFiles([file], 'blogs');
         setFormData(prev => ({ ...prev, featuredImage: paths[0] }));
-      } catch (error) {
+      } catch (error: any) {
         console.error("Image upload failed", error);
-        alert("Failed to upload image. Ensure the local server is running.");
+        alert(`Failed to upload image: ${error.message}. Ensure Cloudinary is configured.`);
       } finally {
         setUploadingImage(false);
       }

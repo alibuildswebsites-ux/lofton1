@@ -14,20 +14,18 @@ export const Footer = () => {
 
   return (
     <footer className="bg-charcoal-dark text-white pt-16 pb-8 border-t border-gray-800">
-      <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-[40px]">
+      <div className="max-w-[1400px] mx-auto px-5 md:px-10 lg:px-[40px] flex flex-col items-center text-center">
         
-        {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          
-          {/* Column 1: Brand */}
-          <div className="space-y-6">
-            <Link to="/" className="inline-block font-extrabold text-2xl text-white tracking-tight rounded-md focus:outline-none focus:ring-2 focus:ring-brand">
+        {/* Brand Section */}
+        <div className="mb-12 flex flex-col items-center">
+            <Link to="/" className="inline-block font-extrabold text-2xl text-white tracking-tight rounded-md focus:outline-none focus:ring-2 focus:ring-brand mb-6">
               Lofton Realty
             </Link>
-            <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
+            <p className="text-gray-400 text-sm leading-relaxed max-w-md mb-8">
               Think Lofton Often. <br/>
               Your trusted partner for buying, selling, and investing in real estate across the Gulf Coast region since 2006.
             </p>
+            
             <div className="flex gap-4">
                {socialLinks.map(({ icon: Icon, url }, i) => (
                  <a 
@@ -41,40 +39,18 @@ export const Footer = () => {
                  </a>
                ))}
              </div>
-          </div>
+        </div>
 
-          {/* Column 2: Explore */}
-          <div>
-            <h4 className="text-lg font-bold mb-6 text-white">Explore</h4>
-            <ul className="space-y-4">
-              <li><Link to="/property-listings" className="text-gray-400 hover:text-brand transition-colors text-sm block">Property Listings</Link></li>
-              <li><Link to="/agents" className="text-gray-400 hover:text-brand transition-colors text-sm block">Meet Our Agents</Link></li>
-              <li><Link to="/blog" className="text-gray-400 hover:text-brand transition-colors text-sm block">Real Estate Blog</Link></li>
-              <li><Link to="/about-us" className="text-gray-400 hover:text-brand transition-colors text-sm block">About Us</Link></li>
-            </ul>
-          </div>
-
-          {/* Column 3: Resources */}
-          <div>
-            <h4 className="text-lg font-bold mb-6 text-white">Resources</h4>
-            <ul className="space-y-4">
-              <li><Link to="/buyers-guide" className="text-gray-400 hover:text-brand transition-colors text-sm block">Buyer's Guide</Link></li>
-              <li><Link to="/sellers-guide" className="text-gray-400 hover:text-brand transition-colors text-sm block">Seller's Guide</Link></li>
-              <li><Link to="/contact-us" className="text-gray-400 hover:text-brand transition-colors text-sm block">Contact Support</Link></li>
-              <li><Link to="/privacy" className="text-gray-400 hover:text-brand transition-colors text-sm block">Privacy Policy</Link></li>
-            </ul>
-          </div>
-
-          {/* Column 4: Account / Contact */}
-          <div>
+        {/* Account & Contact Section */}
+        <div className="mb-12 flex flex-col items-center w-full max-w-md">
             <h4 className="text-lg font-bold mb-6 text-white">Account & Contact</h4>
             
             {/* Account Links */}
-            <div className="mb-8 p-4 rounded-xl bg-white/5 border border-white/10">
+            <div className="mb-8 p-4 rounded-xl bg-white/5 border border-white/10 w-full flex flex-col items-center">
               {user ? (
                 <>
                   <p className="text-sm font-bold text-white mb-2">Welcome, {user.displayName || 'User'}</p>
-                  <Link to="/dashboard" className="flex items-center gap-2 text-brand hover:text-white transition-colors text-sm font-bold">
+                  <Link to="/dashboard" className="flex items-center justify-center gap-2 text-brand hover:text-white transition-colors text-sm font-bold">
                     Go to Dashboard <ArrowRight size={14} />
                   </Link>
                 </>
@@ -88,7 +64,7 @@ export const Footer = () => {
             </div>
 
             {/* Contact Details */}
-            <div className="space-y-3">
+            <div className="space-y-3 flex flex-col items-center">
               <div className="flex items-center gap-3 text-gray-400">
                 <Phone size={16} className="text-brand" />
                 <span className="text-sm">(713) 203-7661</span>
@@ -102,12 +78,10 @@ export const Footer = () => {
                 <span className="text-sm">Houston, TX</span>
               </div>
             </div>
-          </div>
-
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-gray-500 text-xs">
+        <div className="border-t border-gray-800 pt-8 w-full flex flex-col items-center gap-4 text-gray-500 text-xs">
            <p>© {new Date().getFullYear()} Lofton Realty. All rights reserved.</p>
            <div className="flex gap-6">
              <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>

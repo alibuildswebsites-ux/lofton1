@@ -148,9 +148,6 @@ export const Navbar = ({ variant = 'public' }: NavbarProps) => {
             className="font-extrabold text-2xl text-charcoal-dark tracking-tight z-[101] relative flex-shrink-0 mr-8 flex items-center gap-2 group"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white group-hover:rotate-12 transition-transform">
-                <span className="font-serif text-xl leading-none">L</span>
-            </div>
             Lofton Realty
           </Link>
 
